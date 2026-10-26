@@ -1089,6 +1089,23 @@ type ClusterMetadataSpec struct {
 	DCRedirectionPolicy string `json:"dcRedirectionPolicy,omitempty"`
 }
 
+// FailoverVersionIncrement is the failover version increment rendered for every cluster.
+// ClusterMetadataSpec.InitialFailoverVersion's Maximum marker must stay one below it.
+const FailoverVersionIncrement int64 = 10
+
+// IsGlobalNamespaceEnabled reports whether the cluster may host global namespaces.
+func (s *ClusterMetadataSpec) IsGlobalNamespaceEnabled() bool {
+	return s != nil && s.EnableGlobalNamespace
+}
+
+// GetInitialFailoverVersion returns the cluster's initial failover version, or 1 if not set.
+func (s *ClusterMetadataSpec) GetInitialFailoverVersion() int64 {
+	if s == nil || s.InitialFailoverVersion == nil {
+		return 1
+	}
+	return *s.InitialFailoverVersion
+}
+
 // ServiceStatus reports a service status.
 type ServiceStatus struct {
 	// Name of the temporal service.

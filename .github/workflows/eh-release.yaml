@@ -23,7 +23,10 @@ jobs:
         with:
           go-version-file: 'go.mod'
       - name: Point the release manifest at this tag
-        run: sed -i "s|^  newTag: .*|  newTag: ${GITHUB_REF_NAME}|" config/manager/kustomization.yaml
+        run: |
+          make kustomize
+          cd config/manager
+          ../../bin/kustomize edit set image "ghcr.io/alexandrevilain/temporal-operator=ghcr.io/eh-homelab/temporal-operator:${GITHUB_REF_NAME}"
       - name: Generate release artifacts
         run: make artifacts
       - name: Set up Docker Buildx
@@ -41,6 +44,19 @@ jobs:
           push: true
           platforms: linux/amd64
           tags: ghcr.io/eh-homelab/temporal-operator:${{ github.ref_name }}
+      # Nodes pull ghcr.io through an anonymous proxy. A new package is private,
+      # and no API can make it public, so fail here until it is.
+      - name: Check the image is publicly pullable
+        run: |
+          # A private package answers 403 already at the token endpoint.
+          if ! token=$(curl -fsS "https://ghcr.io/token?scope=repository:eh-homelab/temporal-operator:pull" | jq -r .token) ||
+            ! curl -fsSI -o /dev/null \
+              -H "Authorization: Bearer ${token}" \
+              -H "Accept: application/vnd.oci.image.index.v1+json, application/vnd.docker.distribution.manifest.v2+json, application/vnd.oci.image.manifest.v1+json" \
+              "https://ghcr.io/v2/eh-homelab/temporal-operator/manifests/${GITHUB_REF_NAME}"; then
+            echo "::error::ghcr.io/eh-homelab/temporal-operator is not public. Make the package public, then re-run this job."
+            exit 1
+          fi
       - name: Release
         uses: softprops/action-gh-release@v2
         with:
