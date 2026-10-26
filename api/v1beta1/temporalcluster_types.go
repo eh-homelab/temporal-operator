@@ -1064,6 +1064,29 @@ type TemporalClusterSpec struct {
 	// Authorization allows authorization configuration for the temporal cluster.
 	// +optional
 	Authorization *AuthorizationSpec `json:"authorization,omitempty"`
+	// ClusterMetadata configures the cluster for multi-cluster replication.
+	// If not set, the cluster is a standalone cluster.
+	// +optional
+	ClusterMetadata *ClusterMetadataSpec `json:"clusterMetadata,omitempty"`
+}
+
+// ClusterMetadataSpec defines the cluster metadata needed for multi-cluster replication.
+// Remote clusters are not listed here: they are added at runtime with `temporal operator cluster upsert`.
+type ClusterMetadataSpec struct {
+	// EnableGlobalNamespace allows the cluster to host global namespaces.
+	// +optional
+	EnableGlobalNamespace bool `json:"enableGlobalNamespace,omitempty"`
+	// InitialFailoverVersion is the cluster's initial failover version.
+	// Must be unique across replicating clusters and lower than the failover version increment (10).
+	// Defaults to 1.
+	// +optional
+	// +kubebuilder:validation:Minimum=1
+	// +kubebuilder:validation:Maximum=9
+	InitialFailoverVersion *int64 `json:"initialFailoverVersion,omitempty"`
+	// DCRedirectionPolicy is the frontend datacenter redirection policy.
+	// +optional
+	// +kubebuilder:validation:Enum=noop;selected-apis-forwarding;all-apis-forwarding
+	DCRedirectionPolicy string `json:"dcRedirectionPolicy,omitempty"`
 }
 
 // ServiceStatus reports a service status.

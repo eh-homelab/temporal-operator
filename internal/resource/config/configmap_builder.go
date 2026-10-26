@@ -226,15 +226,24 @@ func (b *ConfigmapBuilder) Update(object client.Object) error {
 	temporalCfg.NamespaceDefaults = temporalconfig.NamespaceDefaults{
 		Archival: *archivalNamespaceDefaults,
 	}
+	enableGlobalNamespace := false
+	initialFailoverVersion := int64(1)
+	if md := b.instance.Spec.ClusterMetadata; md != nil {
+		enableGlobalNamespace = md.EnableGlobalNamespace
+		if md.InitialFailoverVersion != nil {
+			initialFailoverVersion = *md.InitialFailoverVersion
+		}
+		temporalCfg.DCRedirectionPolicy.Policy = md.DCRedirectionPolicy
+	}
 	temporalCfg.ClusterMetadata = &cluster.Config{
-		EnableGlobalNamespace:    false,
+		EnableGlobalNamespace:    enableGlobalNamespace,
 		FailoverVersionIncrement: 10,
 		MasterClusterName:        b.instance.Name,
 		CurrentClusterName:       b.instance.Name,
 		ClusterInformation: map[string]cluster.ClusterInformation{
 			b.instance.Name: {
 				Enabled:                true,
-				InitialFailoverVersion: 1,
+				InitialFailoverVersion: initialFailoverVersion,
 				RPCAddress:             "127.0.0.1:7233",
 			},
 		},

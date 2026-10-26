@@ -416,6 +416,17 @@ func (w *TemporalClusterWebhook) ValidateUpdate(_ context.Context, oldObj, newOb
 		)
 	}
 
+	// Once a cluster may host global namespaces, its failover versions are recorded in their histories.
+	if old := oldCluster.Spec.ClusterMetadata; old != nil && old.EnableGlobalNamespace &&
+		initialFailoverVersion(newCluster) != initialFailoverVersion(oldCluster) {
+		errs = append(errs,
+			field.Forbidden(
+				field.NewPath("spec", "clusterMetadata", "initialFailoverVersion"),
+				"Initial failover version is immutable once global namespaces are enabled",
+			),
+		)
+	}
+
 	return warns, w.aggregateClusterErrors(newCluster, errs)
 }
 
@@ -431,4 +442,11 @@ func (w *TemporalClusterWebhook) SetupWebhookWithManager(mgr ctrl.Manager) error
 		WithDefaulter(w).
 		WithValidator(w).
 		Complete()
+}
+
+func initialFailoverVersion(cluster *v1beta1.TemporalCluster) int64 {
+	if md := cluster.Spec.ClusterMetadata; md != nil && md.InitialFailoverVersion != nil {
+		return *md.InitialFailoverVersion
+	}
+	return 1
 }
