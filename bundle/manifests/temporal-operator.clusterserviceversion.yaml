@@ -112,7 +112,7 @@ metadata:
     capabilities: Seamless Upgrades
     categories: Application Runtime, Developer Tools, AI/Machine Learning
     containerImage: ghcr.io/alexandrevilain/temporal-operator
-    createdAt: "2025-10-28T19:37:54Z"
+    createdAt: "2026-10-27T00:21:11Z"
     operators.operatorframework.io/builder: operator-sdk-v1.37.0
     operators.operatorframework.io/project_layout: go.kubebuilder.io/v3
   name: temporal-operator.v0.22.0
@@ -373,7 +373,7 @@ spec:
                 - --leader-elect
                 command:
                 - /manager
-                image: ghcr.io/alexandrevilain/temporal-operator:v0.22.0
+                image: ghcr.io/eh-homelab/temporal-operator:v0.22.0-eh.1
                 livenessProbe:
                   httpGet:
                     path: /healthz
