@@ -577,6 +577,7 @@ type TemporalUISpec struct {
 	// +optional
 	Version string `json:"version"`
 	// Image defines the temporal ui docker image the instance should run.
+	// A tag or digest in it is used as written, and Version is ignored.
 	// +optional
 	Image string `json:"image"`
 	// Number of desired replicas for the ui. Default to 1.
@@ -606,6 +607,8 @@ type TemporalAdminToolsSpec struct {
 	// +optional
 	Enabled bool `json:"enabled"`
 	// Image defines the temporal admin tools docker image the instance should run.
+	// A tag or digest in it is used as written, for the schema jobs too, and Version is ignored.
+	// A tag must be for the server's minor version ("1.28", "1.28@sha256:...").
 	// +optional
 	Image string `json:"image"`
 	// Version defines the temporal admin tools version the instance should run.
@@ -1031,6 +1034,8 @@ func (GCSArchiver) CredentialsFileMountPath() string {
 // TemporalClusterSpec defines the desired state of Cluster.
 type TemporalClusterSpec struct {
 	// Image defines the temporal server docker image the cluster should use for each services.
+	// It may be fully pinned ("temporalio/server:1.28.4", optionally with "@sha256:..."): the tag
+	// then sets Version, so a tool that bumps image tags also moves the version.
 	// +optional
 	Image string `json:"image"`
 	// Version defines the temporal version the cluster to be deployed.

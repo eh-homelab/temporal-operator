@@ -368,7 +368,7 @@ func (b *DeploymentBuilder) Update(object client.Object) error {
 			Containers: []corev1.Container{
 				{
 					Name:                     "service", // name "service" is here to simplify overrides
-					Image:                    fmt.Sprintf("%s:%s", b.instance.Spec.Image, b.instance.Spec.Version),
+					Image:                    v1beta1.ImageWithTag(b.instance.Spec.Image, b.instance.Spec.Version.String()),
 					ImagePullPolicy:          corev1.PullIfNotPresent,
 					Resources:                b.service.Resources,
 					TerminationMessagePath:   corev1.TerminationMessagePathDefault,

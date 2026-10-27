@@ -611,3 +611,68 @@ func TestValidateCreate_PasswordCommandWarning(t *testing.T) {
 	assert.Contains(t, strings.Join(warns, "\n"), "admin-tools image")
 	assert.Contains(t, strings.Join(warns, "\n"), "spec.persistence.defaultStore.sql.passwordCommand")
 }
+
+// TestPinnedImages covers fully pinned image references, the form Dependabot can bump:
+// the server tag sets spec.version, and a pinned admin tools tag must match its minor.
+func TestPinnedImages(t *testing.T) {
+	wh := &webhooks.TemporalClusterWebhook{AvailableAPIs: &discovery.AvailableAPIs{}}
+	cluster := func(image, adminTools string) *v1beta1.TemporalCluster {
+		c := &v1beta1.TemporalCluster{
+			TypeMeta:   v1beta1.TemporalClusterTypeMeta,
+			ObjectMeta: metav1.ObjectMeta{Name: "fake"},
+			Spec: v1beta1.TemporalClusterSpec{
+				Image:      image,
+				AdminTools: &v1beta1.TemporalAdminToolsSpec{Image: adminTools},
+			},
+		}
+		c.Default()
+		return c
+	}
+
+	t.Run("server tag sets the version", func(t *testing.T) {
+		c := cluster("temporalio/server:1.28.4", "")
+		assert.Equal(t, "1.28.4", c.Spec.Version.String())
+		_, err := wh.ValidateCreate(context.Background(), c)
+		require.NoError(t, err)
+	})
+
+	t.Run("server tag overrides a stale version", func(t *testing.T) {
+		c := cluster("temporalio/server:1.29.7", "")
+		c.Spec.Version = version.MustNewVersionFromString("1.28.4")
+		c.Default()
+		assert.Equal(t, "1.29.7", c.Spec.Version.String())
+	})
+
+	t.Run("server tag that is not a version", func(t *testing.T) {
+		_, err := wh.ValidateCreate(context.Background(), cluster("temporalio/server:latest", ""))
+		require.ErrorContains(t, err, "spec.image: Invalid value")
+	})
+
+	for adminTools, ok := range map[string]bool{
+		"temporalio/admin-tools:1.28":                         true,
+		"temporalio/admin-tools:1.28@sha256:abc123":           true,
+		"temporalio/admin-tools:1.28.4-tctl-1.18.4-cli-1.6.2": true,
+		"temporalio/admin-tools:1.29":                         false,
+		"temporalio/admin-tools:1.2":                          false,
+		"temporalio/admin-tools:1.280":                        false,
+		"temporalio/admin-tools@sha256:abc123":                true,
+		"temporalio/admin-tools":                              true,
+	} {
+		t.Run("admin tools "+adminTools, func(t *testing.T) {
+			_, err := wh.ValidateCreate(context.Background(), cluster("temporalio/server:1.28.4", adminTools))
+			if ok {
+				require.NoError(t, err)
+			} else {
+				require.ErrorContains(t, err, "spec.admintools.image: Invalid value")
+			}
+		})
+	}
+
+	t.Run("a tag bump is still one minor at a time", func(t *testing.T) {
+		old := cluster("temporalio/server:1.28.4", "")
+		_, err := wh.ValidateUpdate(context.Background(), old, cluster("temporalio/server:1.29.7", "temporalio/admin-tools:1.29"))
+		require.NoError(t, err)
+		_, err = wh.ValidateUpdate(context.Background(), old, cluster("temporalio/server:1.30.8", "temporalio/admin-tools:1.30"))
+		require.ErrorContains(t, err, "spec.version: Forbidden")
+	})
+}

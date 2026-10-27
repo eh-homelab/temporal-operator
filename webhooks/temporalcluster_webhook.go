@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"net"
 	"strconv"
+	"strings"
 
 	"github.com/alexandrevilain/temporal-operator/api/v1beta1"
 	"github.com/alexandrevilain/temporal-operator/internal/discovery"
@@ -101,6 +102,30 @@ func (w *TemporalClusterWebhook) validateCluster(cluster *v1beta1.TemporalCluste
 	mTLSWarnings, mTLSErrors := cluster.Spec.MTLS.Validate()
 	warns = append(warns, mTLSWarnings...)
 	errs = append(errs, mTLSErrors...)
+
+	// A tagged server image sets spec.version (see Default), so its tag must be a version.
+	if tag := v1beta1.ImageTag(cluster.Spec.Image); tag != "" {
+		if _, err := version.NewVersionFromString(tag); err != nil {
+			errs = append(errs,
+				field.Invalid(field.NewPath("spec", "image"), cluster.Spec.Image,
+					"The image tag must be a Temporal version, e.g. temporalio/server:1.28.4"),
+			)
+		}
+	}
+
+	// The schema jobs migrate with the admin tools image. Tools from another minor would
+	// apply the wrong schema, so a pinned admin tools tag must start with the server's major.minor.
+	if cluster.Spec.AdminTools != nil {
+		if tag := v1beta1.ImageTag(cluster.Spec.AdminTools.Image); tag != "" {
+			want := fmt.Sprintf("%d.%d", cluster.Spec.Version.Major(), cluster.Spec.Version.Minor())
+			if !adminToolsTagMatches(tag, want) {
+				errs = append(errs,
+					field.Invalid(field.NewPath("spec", "admintools", "image"), cluster.Spec.AdminTools.Image,
+						fmt.Sprintf("The admin tools tag must be for Temporal %s, the server's minor version", want)),
+				)
+			}
+		}
+	}
 
 	// Validate that the cluster version is a supported one.
 	err := cluster.Spec.Version.Validate()
@@ -460,4 +485,14 @@ func (w *TemporalClusterWebhook) SetupWebhookWithManager(mgr ctrl.Manager) error
 		WithDefaulter(w).
 		WithValidator(w).
 		Complete()
+}
+
+// adminToolsTagMatches reports whether an admin tools tag ("1.28", "1.28.4-tctl-...")
+// is for Temporal major.minor want ("1.28").
+func adminToolsTagMatches(tag, want string) bool {
+	if !strings.HasPrefix(tag, want) {
+		return false
+	}
+	rest := tag[len(want):]
+	return rest == "" || rest[0] == '.' || rest[0] == '-'
 }

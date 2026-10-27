@@ -71,7 +71,9 @@ string
 </td>
 <td>
 <em>(Optional)</em>
-<p>Image defines the temporal server docker image the cluster should use for each services.</p>
+<p>Image defines the temporal server docker image the cluster should use for each services.
+It may be fully pinned (&ldquo;temporalio/server:1.28.4&rdquo;, optionally with &ldquo;@sha256:&hellip;&rdquo;): the tag
+then sets Version, so a tool that bumps image tags also moves the version.</p>
 </td>
 </tr>
 <tr>
@@ -4749,7 +4751,9 @@ string
 </td>
 <td>
 <em>(Optional)</em>
-<p>Image defines the temporal admin tools docker image the instance should run.</p>
+<p>Image defines the temporal admin tools docker image the instance should run.
+A tag or digest in it is used as written, for the schema jobs too, and Version is ignored.
+A tag must be for the server&rsquo;s minor version (&ldquo;1.28&rdquo;, &ldquo;1.28@sha256:&hellip;&rdquo;).</p>
 </td>
 </tr>
 <tr>
@@ -4974,7 +4978,9 @@ string
 </td>
 <td>
 <em>(Optional)</em>
-<p>Image defines the temporal server docker image the cluster should use for each services.</p>
+<p>Image defines the temporal server docker image the cluster should use for each services.
+It may be fully pinned (&ldquo;temporalio/server:1.28.4&rdquo;, optionally with &ldquo;@sha256:&hellip;&rdquo;): the tag
+then sets Version, so a tool that bumps image tags also moves the version.</p>
 </td>
 </tr>
 <tr>
@@ -6298,7 +6304,8 @@ string
 </td>
 <td>
 <em>(Optional)</em>
-<p>Image defines the temporal ui docker image the instance should run.</p>
+<p>Image defines the temporal ui docker image the instance should run.
+A tag or digest in it is used as written, and Version is ignored.</p>
 </td>
 </tr>
 <tr>

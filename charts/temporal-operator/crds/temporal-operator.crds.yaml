@@ -145,8 +145,10 @@ spec:
                       admin tools alongside the cluster.
                     type: boolean
                   image:
-                    description: Image defines the temporal admin tools docker image
-                      the instance should run.
+                    description: |-
+                      Image defines the temporal admin tools docker image the instance should run.
+                      A tag or digest in it is used as written, for the schema jobs too, and Version is ignored.
+                      A tag must be for the server's minor version ("1.28", "1.28@sha256:...").
                     type: string
                   overrides:
                     description: Overrides adds some overrides to the resources deployed
@@ -594,8 +596,10 @@ spec:
                 - values
                 type: object
               image:
-                description: Image defines the temporal server docker image the cluster
-                  should use for each services.
+                description: |-
+                  Image defines the temporal server docker image the cluster should use for each services.
+                  It may be fully pinned ("temporalio/server:1.28.4", optionally with "@sha256:..."): the tag
+                  then sets Version, so a tool that bumps image tags also moves the version.
                 type: string
               imagePullSecrets:
                 description: |-
@@ -4427,8 +4431,9 @@ spec:
                       web ui alongside the cluster.
                     type: boolean
                   image:
-                    description: Image defines the temporal ui docker image the instance
-                      should run.
+                    description: |-
+                      Image defines the temporal ui docker image the instance should run.
+                      A tag or digest in it is used as written, and Version is ignored.
                     type: string
                   ingress:
                     description: |-

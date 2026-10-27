@@ -8,6 +8,11 @@ eh-homelab fork (`v0.22.0-eh.*`):
 - Add support for Temporal Server v1.32.x: the supported range is extended to `< 1.33.0`. v1.32 changes no image contents or static-config format the operator renders; its breaking changes are dynamic config and API behaviour. The default version is unchanged.
 - New optional `spec.clusterMetadata` on `TemporalCluster` (`enableGlobalNamespace`, `initialFailoverVersion`, `dcRedirectionPolicy`) for multi-cluster replication. Unset, the rendered config is unchanged. Once global namespaces are enabled, the webhook forbids disabling them or changing the failover version, which Temporal persists and would ignore.
 - Includes upstream PR #987 (v1.29 to v1.31 support), squashed.
+- Image fields may be fully pinned, the form Dependabot can bump: `spec.image`
+  (`temporalio/server:1.28.4`, the tag then sets `spec.version`),
+  `spec.admintools.image` (`temporalio/admin-tools:1.28@sha256:...`, used by the schema
+  jobs too; its tag must be for the server's minor) and `spec.ui.image`. Untagged images
+  behave as before.
 
 Improvements:
 - Add support for Temporal Server v1.29.x. Temporal v1.29 introduces only dynamic-config changes (task-queue fairness, task-queue config API), which are already supported through the cluster `dynamicConfig` field.
