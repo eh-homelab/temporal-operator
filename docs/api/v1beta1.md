@@ -71,7 +71,9 @@ string
 </td>
 <td>
 <em>(Optional)</em>
-<p>Image defines the temporal server docker image the cluster should use for each services.</p>
+<p>Image defines the temporal server docker image the cluster should use for each services.
+It may be fully pinned (&ldquo;temporalio/server:1.28.4&rdquo;, optionally with &ldquo;@sha256:&hellip;&rdquo;): the tag
+then sets Version, so a tool that bumps image tags also moves the version.</p>
 </td>
 </tr>
 <tr>
@@ -292,6 +294,21 @@ AuthorizationSpec
 <td>
 <em>(Optional)</em>
 <p>Authorization allows authorization configuration for the temporal cluster.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>clusterMetadata</code><br>
+<em>
+<a href="#temporal.io/v1beta1.ClusterMetadataSpec">
+ClusterMetadataSpec
+</a>
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>ClusterMetadata configures the cluster for multi-cluster replication.
+If not set, the cluster is a standalone cluster.</p>
 </td>
 </tr>
 </table>
@@ -923,6 +940,66 @@ ArchivalSpec
 </table>
 </div>
 </div>
+<h3 id="temporal.io/v1beta1.ClusterMetadataSpec">ClusterMetadataSpec
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#temporal.io/v1beta1.TemporalClusterSpec">TemporalClusterSpec</a>)
+</p>
+<p>ClusterMetadataSpec defines the cluster metadata needed for multi-cluster replication.
+Remote clusters are not listed here: they are added at runtime with <code>temporal operator cluster upsert</code>.</p>
+<div class="md-typeset__scrollwrap">
+<div class="md-typeset__table">
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>enableGlobalNamespace</code><br>
+<em>
+bool
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>EnableGlobalNamespace allows the cluster to host global namespaces.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>initialFailoverVersion</code><br>
+<em>
+int64
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>InitialFailoverVersion is the cluster&rsquo;s initial failover version.
+Must be unique across replicating clusters and lower than the failover version increment (10).
+Defaults to 1.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>dcRedirectionPolicy</code><br>
+<em>
+string
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>DCRedirectionPolicy is the frontend datacenter redirection policy.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <h3 id="temporal.io/v1beta1.ConstrainedValue">ConstrainedValue
 </h3>
 <p>
@@ -1489,7 +1566,7 @@ Defaults to 10s.</p>
 <code>values</code><br>
 <em>
 <a href="#temporal.io/v1beta1.ConstrainedValue">
-map[string][]./api/v1beta1.ConstrainedValue
+map[string][]ConstrainedValue
 </a>
 </em>
 </td>
@@ -2721,6 +2798,66 @@ Kubernetes core/v1.SecretKeySelector
 </table>
 </div>
 </div>
+<h3 id="temporal.io/v1beta1.SQLPasswordCommandSpec">SQLPasswordCommandSpec
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#temporal.io/v1beta1.SQLSpec">SQLSpec</a>)
+</p>
+<p>SQLPasswordCommandSpec configures an external command used to retrieve the
+datastore password at runtime. Available for Temporal clusters &gt;= 1.31.0.</p>
+<div class="md-typeset__scrollwrap">
+<div class="md-typeset__table">
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>command</code><br>
+<em>
+string
+</em>
+</td>
+<td>
+<p>Command is the path to the executable to run.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>args</code><br>
+<em>
+[]string
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>Args is the list of arguments passed to the command.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>timeout</code><br>
+<em>
+<a href="https://pkg.go.dev/k8s.io/apimachinery/pkg/apis/meta/v1#Duration">
+Kubernetes meta/v1.Duration
+</a>
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>Timeout is the maximum duration to wait for the command to complete.
+Defaults to 30 seconds if unset.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <h3 id="temporal.io/v1beta1.SQLSpec">SQLSpec
 </h3>
 <p>
@@ -2866,6 +3003,25 @@ string
 <td>
 <em>(Optional)</em>
 <p>GCPServiceAccount is the service account to use to authenticate with GCP CloudSQL.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>passwordCommand</code><br>
+<em>
+<a href="#temporal.io/v1beta1.SQLPasswordCommandSpec">
+SQLPasswordCommandSpec
+</a>
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>PasswordCommand executes an external command whose standard output is used
+as the datastore password, for instance to generate a short-lived cloud IAM
+auth token (AWS RDS, GCP Cloud SQL). Mutually exclusive with the datastore
+passwordSecretRef. When the command returns an expiring token, set
+maxConnLifetime so connections are recycled before the token expires.
+Requires Temporal &gt;= 1.31.0.</p>
 </td>
 </tr>
 </tbody>
@@ -4595,7 +4751,9 @@ string
 </td>
 <td>
 <em>(Optional)</em>
-<p>Image defines the temporal admin tools docker image the instance should run.</p>
+<p>Image defines the temporal admin tools docker image the instance should run.
+A tag or digest in it is used as written, for the schema jobs too, and Version is ignored.
+A tag must be for the server&rsquo;s minor version (&ldquo;1.28&rdquo;, &ldquo;1.28@sha256:&hellip;&rdquo;).</p>
 </td>
 </tr>
 <tr>
@@ -4820,7 +4978,9 @@ string
 </td>
 <td>
 <em>(Optional)</em>
-<p>Image defines the temporal server docker image the cluster should use for each services.</p>
+<p>Image defines the temporal server docker image the cluster should use for each services.
+It may be fully pinned (&ldquo;temporalio/server:1.28.4&rdquo;, optionally with &ldquo;@sha256:&hellip;&rdquo;): the tag
+then sets Version, so a tool that bumps image tags also moves the version.</p>
 </td>
 </tr>
 <tr>
@@ -5041,6 +5201,21 @@ AuthorizationSpec
 <td>
 <em>(Optional)</em>
 <p>Authorization allows authorization configuration for the temporal cluster.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>clusterMetadata</code><br>
+<em>
+<a href="#temporal.io/v1beta1.ClusterMetadataSpec">
+ClusterMetadataSpec
+</a>
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>ClusterMetadata configures the cluster for multi-cluster replication.
+If not set, the cluster is a standalone cluster.</p>
 </td>
 </tr>
 </tbody>
@@ -5297,6 +5472,32 @@ TemporalNamespaceArchivalSpec
 If not set, the default cluster configuration is used.</p>
 </td>
 </tr>
+<tr>
+<td>
+<code>customSearchAttributes</code><br>
+<em>
+map[string]string
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>CustomSearchAttributes is an optional mapping of custom search attribute names to types.
+Supported types: Text, Keyword, Int, Double, Bool, DateTime, KeywordList.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>allowSearchAttributeDeletion</code><br>
+<em>
+bool
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>AllowSearchAttributeDeletion makes the controller remove custom search attributes
+from the Temporal server if they are not present in the spec.</p>
+</td>
+</tr>
 </table>
 </td>
 </tr>
@@ -5519,6 +5720,32 @@ TemporalNamespaceArchivalSpec
 <em>(Optional)</em>
 <p>Archival is a per-namespace archival configuration.
 If not set, the default cluster configuration is used.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>customSearchAttributes</code><br>
+<em>
+map[string]string
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>CustomSearchAttributes is an optional mapping of custom search attribute names to types.
+Supported types: Text, Keyword, Int, Double, Bool, DateTime, KeywordList.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>allowSearchAttributeDeletion</code><br>
+<em>
+bool
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>AllowSearchAttributeDeletion makes the controller remove custom search attributes
+from the Temporal server if they are not present in the spec.</p>
 </td>
 </tr>
 </tbody>
@@ -6077,7 +6304,8 @@ string
 </td>
 <td>
 <em>(Optional)</em>
-<p>Image defines the temporal ui docker image the instance should run.</p>
+<p>Image defines the temporal ui docker image the instance should run.
+A tag or digest in it is used as written, and Version is ignored.</p>
 </td>
 </tr>
 <tr>

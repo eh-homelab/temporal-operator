@@ -253,6 +253,28 @@ type SQLSpec struct {
 	// GCPServiceAccount is the service account to use to authenticate with GCP CloudSQL.
 	// +optional
 	GCPServiceAccount *string `json:"gcpServiceAccount,omitempty"`
+	// PasswordCommand executes an external command whose standard output is used
+	// as the datastore password, for instance to generate a short-lived cloud IAM
+	// auth token (AWS RDS, GCP Cloud SQL). Mutually exclusive with the datastore
+	// passwordSecretRef. When the command returns an expiring token, set
+	// maxConnLifetime so connections are recycled before the token expires.
+	// Requires Temporal >= 1.31.0.
+	// +optional
+	PasswordCommand *SQLPasswordCommandSpec `json:"passwordCommand,omitempty"`
+}
+
+// SQLPasswordCommandSpec configures an external command used to retrieve the
+// datastore password at runtime. Available for Temporal clusters >= 1.31.0.
+type SQLPasswordCommandSpec struct {
+	// Command is the path to the executable to run.
+	Command string `json:"command"`
+	// Args is the list of arguments passed to the command.
+	// +optional
+	Args []string `json:"args,omitempty"`
+	// Timeout is the maximum duration to wait for the command to complete.
+	// Defaults to 30 seconds if unset.
+	// +optional
+	Timeout *metav1.Duration `json:"timeout,omitempty"`
 }
 
 // DatastoreTLSSpec contains datastore TLS connections specifications.
@@ -555,6 +577,7 @@ type TemporalUISpec struct {
 	// +optional
 	Version string `json:"version"`
 	// Image defines the temporal ui docker image the instance should run.
+	// A tag or digest in it is used as written, and Version is ignored.
 	// +optional
 	Image string `json:"image"`
 	// Number of desired replicas for the ui. Default to 1.
@@ -584,6 +607,8 @@ type TemporalAdminToolsSpec struct {
 	// +optional
 	Enabled bool `json:"enabled"`
 	// Image defines the temporal admin tools docker image the instance should run.
+	// A tag or digest in it is used as written, for the schema jobs too, and Version is ignored.
+	// A tag must be for the server's minor version ("1.28", "1.28@sha256:...").
 	// +optional
 	Image string `json:"image"`
 	// Version defines the temporal admin tools version the instance should run.
@@ -1009,6 +1034,8 @@ func (GCSArchiver) CredentialsFileMountPath() string {
 // TemporalClusterSpec defines the desired state of Cluster.
 type TemporalClusterSpec struct {
 	// Image defines the temporal server docker image the cluster should use for each services.
+	// It may be fully pinned ("temporalio/server:1.28.4", optionally with "@sha256:..."): the tag
+	// then sets Version, so a tool that bumps image tags also moves the version.
 	// +optional
 	Image string `json:"image"`
 	// Version defines the temporal version the cluster to be deployed.
@@ -1064,6 +1091,46 @@ type TemporalClusterSpec struct {
 	// Authorization allows authorization configuration for the temporal cluster.
 	// +optional
 	Authorization *AuthorizationSpec `json:"authorization,omitempty"`
+	// ClusterMetadata configures the cluster for multi-cluster replication.
+	// If not set, the cluster is a standalone cluster.
+	// +optional
+	ClusterMetadata *ClusterMetadataSpec `json:"clusterMetadata,omitempty"`
+}
+
+// ClusterMetadataSpec defines the cluster metadata needed for multi-cluster replication.
+// Remote clusters are not listed here: they are added at runtime with `temporal operator cluster upsert`.
+type ClusterMetadataSpec struct {
+	// EnableGlobalNamespace allows the cluster to host global namespaces.
+	// +optional
+	EnableGlobalNamespace bool `json:"enableGlobalNamespace,omitempty"`
+	// InitialFailoverVersion is the cluster's initial failover version.
+	// Must be unique across replicating clusters and lower than the failover version increment (10).
+	// Defaults to 1.
+	// +optional
+	// +kubebuilder:validation:Minimum=1
+	// +kubebuilder:validation:Maximum=9
+	InitialFailoverVersion *int64 `json:"initialFailoverVersion,omitempty"`
+	// DCRedirectionPolicy is the frontend datacenter redirection policy.
+	// +optional
+	// +kubebuilder:validation:Enum=noop;selected-apis-forwarding;all-apis-forwarding
+	DCRedirectionPolicy string `json:"dcRedirectionPolicy,omitempty"`
+}
+
+// FailoverVersionIncrement is the failover version increment rendered for every cluster.
+// ClusterMetadataSpec.InitialFailoverVersion's Maximum marker must stay one below it.
+const FailoverVersionIncrement int64 = 10
+
+// IsGlobalNamespaceEnabled reports whether the cluster may host global namespaces.
+func (s *ClusterMetadataSpec) IsGlobalNamespaceEnabled() bool {
+	return s != nil && s.EnableGlobalNamespace
+}
+
+// GetInitialFailoverVersion returns the cluster's initial failover version, or 1 if not set.
+func (s *ClusterMetadataSpec) GetInitialFailoverVersion() int64 {
+	if s == nil || s.InitialFailoverVersion == nil {
+		return 1
+	}
+	return *s.InitialFailoverVersion
 }
 
 // ServiceStatus reports a service status.

@@ -3,7 +3,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.16.3
+    controller-gen.kubebuilder.io/version: v0.21.0
   name: temporalclusters.temporal.io
 spec:
   group: temporal.io
@@ -56,7 +56,10 @@ spec:
                       description: Enabled defines if the operator should deploy the admin tools alongside the cluster.
                       type: boolean
                     image:
-                      description: Image defines the temporal admin tools docker image the instance should run.
+                      description: |-
+                        Image defines the temporal admin tools docker image the instance should run.
+                        A tag or digest in it is used as written, for the schema jobs too, and Version is ignored.
+                        A tag must be for the server's minor version ("1.28", "1.28@sha256:...").
                       type: string
                     overrides:
                       description: Overrides adds some overrides to the resources deployed for the ui.
@@ -129,7 +132,7 @@ spec:
                             Claims lists the names of resources, defined in spec.resourceClaims,
                             that are used by this container.
 
-                            This is an alpha field and requires enabling the
+                            This field depends on the
                             DynamicResourceAllocation feature gate.
 
                             This field is immutable. It can only be set for containers.
@@ -402,6 +405,31 @@ spec:
                       description: PermissionsClaimName is the name of the claim within the JWT token that contains the user's permissions.
                       type: string
                   type: object
+                clusterMetadata:
+                  description: |-
+                    ClusterMetadata configures the cluster for multi-cluster replication.
+                    If not set, the cluster is a standalone cluster.
+                  properties:
+                    dcRedirectionPolicy:
+                      description: DCRedirectionPolicy is the frontend datacenter redirection policy.
+                      enum:
+                        - noop
+                        - selected-apis-forwarding
+                        - all-apis-forwarding
+                      type: string
+                    enableGlobalNamespace:
+                      description: EnableGlobalNamespace allows the cluster to host global namespaces.
+                      type: boolean
+                    initialFailoverVersion:
+                      description: |-
+                        InitialFailoverVersion is the cluster's initial failover version.
+                        Must be unique across replicating clusters and lower than the failover version increment (10).
+                        Defaults to 1.
+                      format: int64
+                      maximum: 9
+                      minimum: 1
+                      type: integer
+                  type: object
                 dynamicConfig:
                   description: DynamicConfig allows advanced configuration for the temporal cluster.
                   properties:
@@ -448,7 +476,10 @@ spec:
                     - values
                   type: object
                 image:
-                  description: Image defines the temporal server docker image the cluster should use for each services.
+                  description: |-
+                    Image defines the temporal server docker image the cluster should use for each services.
+                    It may be fully pinned ("temporalio/server:1.28.4", optionally with "@sha256:..."): the tag
+                    then sets Version, so a tool that bumps image tags also moves the version.
                   type: string
                 imagePullSecrets:
                   description: |-
@@ -486,7 +517,7 @@ spec:
                         Claims lists the names of resources, defined in spec.resourceClaims,
                         that are used by this container.
 
-                        This is an alpha field and requires enabling the
+                        This field depends on the
                         DynamicResourceAllocation feature gate.
 
                         This field is immutable. It can only be set for containers.
@@ -2029,7 +2060,7 @@ spec:
                                     - LOCAL_QUORUM
                                     - EACH_QUORUM
                                     - LOCAL_ONE
-                                  type: integer
+                                  type: string
                                 serialConsistency:
                                   description: |-
                                     SerialConsistency sets the consistency for the serial prtion of queries. Values identical to gocql SerialConsistency values.
@@ -2037,7 +2068,7 @@ spec:
                                   enum:
                                     - SERIAL
                                     - LOCAL_SERIAL
-                                  type: integer
+                                  type: string
                               type: object
                             datacenter:
                               description: Datacenter is the data center filter arg for cassandra.
@@ -2166,6 +2197,31 @@ spec:
                             maxIdleConns:
                               description: MaxIdleConns is the max number of idle connections to this datastore.
                               type: integer
+                            passwordCommand:
+                              description: |-
+                                PasswordCommand executes an external command whose standard output is used
+                                as the datastore password, for instance to generate a short-lived cloud IAM
+                                auth token (AWS RDS, GCP Cloud SQL). Mutually exclusive with the datastore
+                                passwordSecretRef. When the command returns an expiring token, set
+                                maxConnLifetime so connections are recycled before the token expires.
+                                Requires Temporal >= 1.31.0.
+                              properties:
+                                args:
+                                  description: Args is the list of arguments passed to the command.
+                                  items:
+                                    type: string
+                                  type: array
+                                command:
+                                  description: Command is the path to the executable to run.
+                                  type: string
+                                timeout:
+                                  description: |-
+                                    Timeout is the maximum duration to wait for the command to complete.
+                                    Defaults to 30 seconds if unset.
+                                  type: string
+                              required:
+                                - command
+                              type: object
                             pluginName:
                               description: PluginName is the name of SQL plugin.
                               enum:
@@ -2267,7 +2323,7 @@ spec:
                                     - LOCAL_QUORUM
                                     - EACH_QUORUM
                                     - LOCAL_ONE
-                                  type: integer
+                                  type: string
                                 serialConsistency:
                                   description: |-
                                     SerialConsistency sets the consistency for the serial prtion of queries. Values identical to gocql SerialConsistency values.
@@ -2275,7 +2331,7 @@ spec:
                                   enum:
                                     - SERIAL
                                     - LOCAL_SERIAL
-                                  type: integer
+                                  type: string
                               type: object
                             datacenter:
                               description: Datacenter is the data center filter arg for cassandra.
@@ -2404,6 +2460,31 @@ spec:
                             maxIdleConns:
                               description: MaxIdleConns is the max number of idle connections to this datastore.
                               type: integer
+                            passwordCommand:
+                              description: |-
+                                PasswordCommand executes an external command whose standard output is used
+                                as the datastore password, for instance to generate a short-lived cloud IAM
+                                auth token (AWS RDS, GCP Cloud SQL). Mutually exclusive with the datastore
+                                passwordSecretRef. When the command returns an expiring token, set
+                                maxConnLifetime so connections are recycled before the token expires.
+                                Requires Temporal >= 1.31.0.
+                              properties:
+                                args:
+                                  description: Args is the list of arguments passed to the command.
+                                  items:
+                                    type: string
+                                  type: array
+                                command:
+                                  description: Command is the path to the executable to run.
+                                  type: string
+                                timeout:
+                                  description: |-
+                                    Timeout is the maximum duration to wait for the command to complete.
+                                    Defaults to 30 seconds if unset.
+                                  type: string
+                              required:
+                                - command
+                              type: object
                             pluginName:
                               description: PluginName is the name of SQL plugin.
                               enum:
@@ -2507,7 +2588,7 @@ spec:
                                     - LOCAL_QUORUM
                                     - EACH_QUORUM
                                     - LOCAL_ONE
-                                  type: integer
+                                  type: string
                                 serialConsistency:
                                   description: |-
                                     SerialConsistency sets the consistency for the serial prtion of queries. Values identical to gocql SerialConsistency values.
@@ -2515,7 +2596,7 @@ spec:
                                   enum:
                                     - SERIAL
                                     - LOCAL_SERIAL
-                                  type: integer
+                                  type: string
                               type: object
                             datacenter:
                               description: Datacenter is the data center filter arg for cassandra.
@@ -2644,6 +2725,31 @@ spec:
                             maxIdleConns:
                               description: MaxIdleConns is the max number of idle connections to this datastore.
                               type: integer
+                            passwordCommand:
+                              description: |-
+                                PasswordCommand executes an external command whose standard output is used
+                                as the datastore password, for instance to generate a short-lived cloud IAM
+                                auth token (AWS RDS, GCP Cloud SQL). Mutually exclusive with the datastore
+                                passwordSecretRef. When the command returns an expiring token, set
+                                maxConnLifetime so connections are recycled before the token expires.
+                                Requires Temporal >= 1.31.0.
+                              properties:
+                                args:
+                                  description: Args is the list of arguments passed to the command.
+                                  items:
+                                    type: string
+                                  type: array
+                                command:
+                                  description: Command is the path to the executable to run.
+                                  type: string
+                                timeout:
+                                  description: |-
+                                    Timeout is the maximum duration to wait for the command to complete.
+                                    Defaults to 30 seconds if unset.
+                                  type: string
+                              required:
+                                - command
+                              type: object
                             pluginName:
                               description: PluginName is the name of SQL plugin.
                               enum:
@@ -2745,7 +2851,7 @@ spec:
                                     - LOCAL_QUORUM
                                     - EACH_QUORUM
                                     - LOCAL_ONE
-                                  type: integer
+                                  type: string
                                 serialConsistency:
                                   description: |-
                                     SerialConsistency sets the consistency for the serial prtion of queries. Values identical to gocql SerialConsistency values.
@@ -2753,7 +2859,7 @@ spec:
                                   enum:
                                     - SERIAL
                                     - LOCAL_SERIAL
-                                  type: integer
+                                  type: string
                               type: object
                             datacenter:
                               description: Datacenter is the data center filter arg for cassandra.
@@ -2882,6 +2988,31 @@ spec:
                             maxIdleConns:
                               description: MaxIdleConns is the max number of idle connections to this datastore.
                               type: integer
+                            passwordCommand:
+                              description: |-
+                                PasswordCommand executes an external command whose standard output is used
+                                as the datastore password, for instance to generate a short-lived cloud IAM
+                                auth token (AWS RDS, GCP Cloud SQL). Mutually exclusive with the datastore
+                                passwordSecretRef. When the command returns an expiring token, set
+                                maxConnLifetime so connections are recycled before the token expires.
+                                Requires Temporal >= 1.31.0.
+                              properties:
+                                args:
+                                  description: Args is the list of arguments passed to the command.
+                                  items:
+                                    type: string
+                                  type: array
+                                command:
+                                  description: Command is the path to the executable to run.
+                                  type: string
+                                timeout:
+                                  description: |-
+                                    Timeout is the maximum duration to wait for the command to complete.
+                                    Defaults to 30 seconds if unset.
+                                  type: string
+                              required:
+                                - command
+                              type: object
                             pluginName:
                               description: PluginName is the name of SQL plugin.
                               enum:
@@ -3077,7 +3208,7 @@ spec:
                                 Claims lists the names of resources, defined in spec.resourceClaims,
                                 that are used by this container.
 
-                                This is an alpha field and requires enabling the
+                                This field depends on the
                                 DynamicResourceAllocation feature gate.
 
                                 This field is immutable. It can only be set for containers.
@@ -3244,7 +3375,7 @@ spec:
                                 Claims lists the names of resources, defined in spec.resourceClaims,
                                 that are used by this container.
 
-                                This is an alpha field and requires enabling the
+                                This field depends on the
                                 DynamicResourceAllocation feature gate.
 
                                 This field is immutable. It can only be set for containers.
@@ -3417,7 +3548,7 @@ spec:
                                 Claims lists the names of resources, defined in spec.resourceClaims,
                                 that are used by this container.
 
-                                This is an alpha field and requires enabling the
+                                This field depends on the
                                 DynamicResourceAllocation feature gate.
 
                                 This field is immutable. It can only be set for containers.
@@ -3584,7 +3715,7 @@ spec:
                                 Claims lists the names of resources, defined in spec.resourceClaims,
                                 that are used by this container.
 
-                                This is an alpha field and requires enabling the
+                                This field depends on the
                                 DynamicResourceAllocation feature gate.
 
                                 This field is immutable. It can only be set for containers.
@@ -3814,7 +3945,7 @@ spec:
                                 Claims lists the names of resources, defined in spec.resourceClaims,
                                 that are used by this container.
 
-                                This is an alpha field and requires enabling the
+                                This field depends on the
                                 DynamicResourceAllocation feature gate.
 
                                 This field is immutable. It can only be set for containers.
@@ -3874,7 +4005,9 @@ spec:
                       description: Enabled defines if the operator should deploy the web ui alongside the cluster.
                       type: boolean
                     image:
-                      description: Image defines the temporal ui docker image the instance should run.
+                      description: |-
+                        Image defines the temporal ui docker image the instance should run.
+                        A tag or digest in it is used as written, and Version is ignored.
                       type: string
                     ingress:
                       description: |-
@@ -3998,7 +4131,7 @@ spec:
                             Claims lists the names of resources, defined in spec.resourceClaims,
                             that are used by this container.
 
-                            This is an alpha field and requires enabling the
+                            This field depends on the
                             DynamicResourceAllocation feature gate.
 
                             This field is immutable. It can only be set for containers.

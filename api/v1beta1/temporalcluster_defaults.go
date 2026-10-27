@@ -26,10 +26,10 @@ import (
 )
 
 const (
-	defaultTemporalVersion = "1.24.3"
+	defaultTemporalVersion = "1.31.1"
 	defaultTemporalImage   = "temporalio/server"
 
-	defaultTemporalUIVersion = "2.27.3"
+	defaultTemporalUIVersion = "2.49.1"
 	defaultTemporalUIImage   = "temporalio/ui"
 
 	defaultTemporalAdmintoolsImage = "temporalio/admin-tools"
@@ -58,6 +58,14 @@ func (s *DatastoreSpec) Default() {
 
 // Default set default fields values.
 func (c *TemporalCluster) Default() {
+	// A tagged server image is the source of truth for the version, so a tool that
+	// bumps only image tags (Dependabot) also moves the version, schemas included.
+	// An unparsable tag is left for the validating webhook to reject.
+	if tag := ImageTag(c.Spec.Image); tag != "" {
+		if v, err := version.NewVersionFromString(tag); err == nil {
+			c.Spec.Version = v
+		}
+	}
 	if c.Spec.Version == nil {
 		c.Spec.Version = version.MustNewVersionFromString(defaultTemporalVersion)
 	}

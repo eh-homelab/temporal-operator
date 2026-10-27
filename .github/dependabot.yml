@@ -1,0 +1,12 @@
+# eh-homelab fork: Dependabot reads this from the default branch, which must be
+# eh/base (the branch the v*-eh.* releases are cut from), not upstream's main.
+version: 2
+updates:
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
