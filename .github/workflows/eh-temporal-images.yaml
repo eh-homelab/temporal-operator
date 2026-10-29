@@ -1,0 +1,219 @@
+name: Publish eh-homelab Temporal images
+
+# Builds Temporal's server and admin-tools images from temporalio/temporal's own
+# sources and pushes them to ghcr.io/eh-homelab/temporal-server and
+# ghcr.io/eh-homelab/temporal-admin-tools.
+#
+# A tag `temporal-v<version>-eh.<n>` builds upstream tag `v<version>` and pushes
+# `<version>` and `<version>-eh.<n>` of both images.
+#
+# Kept 1:1 with upstream's docker-build-manual.yml: the same build-binaries
+# action (GoReleaser), the same docker-build-helper (binaries, schema, the CLI
+# at upstream's pinned version) and the same docker-bake.hcl and Dockerfiles,
+# all read from the upstream tag. The differences, and why:
+#   - the server image also carries the `temporal` CLI, as images up to 1.29
+#     did, so `kubectl exec` into a frontend pod can run it. It is the same
+#     binary admin-tools ships. This is one appended COPY line;
+#   - images go to this fork's ghcr, with our tags, not to Docker Hub;
+#   - a check that both packages are public, which the nodes' anonymous ghcr
+#     proxy needs.
+on:
+  push:
+    tags:
+      - 'temporal-v*-eh.*'
+
+permissions:
+  contents: read
+
+env:
+  REGISTRY: ghcr.io
+
+jobs:
+  version:
+    runs-on: ubuntu-latest
+    outputs:
+      ref: ${{ steps.parse.outputs.ref }}
+      version: ${{ steps.parse.outputs.version }}
+      eh-tag: ${{ steps.parse.outputs.eh-tag }}
+    steps:
+      - name: Parse the tag
+        id: parse
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          if ! printf '%s' "$TAG" | grep -Eq '^temporal-v[0-9]+\.[0-9]+\.[0-9]+-eh\.[0-9]+$'; then
+            echo "::error::tag ${TAG} is not temporal-v<x.y.z>-eh.<n>"
+            exit 1
+          fi
+          version=${TAG#temporal-v}
+          version=${version%-eh.*}
+          {
+            echo "ref=v${version}"
+            echo "version=${version}"
+            echo "eh-tag=${TAG#temporal-v}"
+          } >> "$GITHUB_OUTPUT"
+
+  build-binaries:
+    needs: version
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    strategy:
+      matrix:
+        arch: [amd64, arm64]
+    steps:
+      - name: Checkout temporalio/temporal
+        uses: actions/checkout@v6
+        with:
+          repository: temporalio/temporal
+          ref: ${{ needs.version.outputs.ref }}
+          fetch-depth: 0
+
+      - name: Build binaries
+        uses: ./.github/actions/build-binaries
+        with:
+          single-arch: ${{ matrix.arch }}
+
+      - name: Upload binaries
+        uses: actions/upload-artifact@v6
+        with:
+          name: binaries-${{ matrix.arch }}
+          path: dist/*_linux_*
+          if-no-files-found: error
+          retention-days: 1
+
+  build-docker:
+    needs: [version, build-binaries]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    env:
+      VERSION: ${{ needs.version.outputs.version }}
+      EH_TAG: ${{ needs.version.outputs.eh-tag }}
+    steps:
+      - name: Checkout temporalio/temporal
+        uses: actions/checkout@v6
+        with:
+          repository: temporalio/temporal
+          ref: ${{ needs.version.outputs.ref }}
+          fetch-depth: 0
+
+      - name: Download binaries
+        uses: actions/download-artifact@v6
+        with:
+          pattern: binaries-*
+          merge-multiple: true
+          path: dist
+
+      - name: Setup Go
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: "go.mod"
+          cache: true
+
+      # The steps of upstream's build-docker-images action, up to its bake.
+      # That action itself is not used: it logs in to Docker Hub and pushes
+      # to temporaliotest.
+      - name: Build docker-build-helper
+        working-directory: .github/actions/build-docker-images/scripts
+        run: go build -o docker-build-helper .
+
+      - name: Organize binaries for Docker
+        id: organize-binaries
+        run: .github/actions/build-docker-images/scripts/docker-build-helper organize-binaries
+
+      - name: Download Temporal CLI
+        env:
+          AVAILABLE_ARCHS: ${{ steps.organize-binaries.outputs.available-archs }}
+        run: .github/actions/build-docker-images/scripts/docker-build-helper download-cli
+
+      - name: Extract CLI version from binary
+        id: extract-cli-version
+        run: .github/actions/build-docker-images/scripts/docker-build-helper extract-binary-version temporal cli-version
+
+      - name: Extract server version from binary
+        id: extract-version
+        run: .github/actions/build-docker-images/scripts/docker-build-helper extract-binary-version temporal-server server-version
+
+      - name: Check the binary is the tagged version
+        env:
+          SERVER_VERSION: ${{ steps.extract-version.outputs.server-version }}
+        run: |
+          if [ "$SERVER_VERSION" != "$VERSION" ]; then
+            echo "::error::built temporal-server ${SERVER_VERSION}, wanted ${VERSION}"
+            exit 1
+          fi
+
+      - name: Add the CLI to the server image
+        run: |
+          cat >> docker/targets/server.Dockerfile <<'EOF'
+
+          # eh-homelab: the temporal CLI, as server images up to 1.29 carried.
+          COPY --chmod=755 ./build/${TARGETARCH}/temporal /usr/local/bin/
+          EOF
+
+      # Later bake files override earlier ones per attribute, so this replaces
+      # only the tags.
+      - name: Write the tag override
+        run: |
+          cat > eh-tags.hcl <<EOF
+          target "server" {
+            tags = ["${REGISTRY}/eh-homelab/temporal-server:${VERSION}", "${REGISTRY}/eh-homelab/temporal-server:${EH_TAG}"]
+          }
+          target "admin-tools" {
+            tags = ["${REGISTRY}/eh-homelab/temporal-admin-tools:${VERSION}", "${REGISTRY}/eh-homelab/temporal-admin-tools:${EH_TAG}"]
+          }
+          EOF
+          cat eh-tags.hcl
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Docker images
+        env:
+          SERVER_VERSION: ${{ steps.extract-version.outputs.server-version }}
+          CLI_VERSION: ${{ steps.extract-cli-version.outputs.cli-version }}
+        run: |
+          # The upstream commit, for the image's revision label.
+          TEMPORAL_SHA=$(git rev-parse HEAD)
+          export TEMPORAL_SHA
+          docker buildx bake --push \
+            -f docker/docker-bake.hcl -f eh-tags.hcl \
+            server admin-tools
+
+      # Nodes pull ghcr.io through an anonymous proxy. A new package is private,
+      # and no API can make it public, so fail here until it is.
+      - name: Check the images are publicly pullable
+        run: |
+          rc=0
+          for pkg in temporal-server temporal-admin-tools; do
+            if ! token=$(curl -fsS "https://ghcr.io/token?scope=repository:eh-homelab/${pkg}:pull" | jq -r .token) ||
+              ! curl -fsSI -o /dev/null \
+                -H "Authorization: Bearer ${token}" \
+                -H "Accept: application/vnd.oci.image.index.v1+json, application/vnd.docker.distribution.manifest.v2+json, application/vnd.oci.image.manifest.v1+json" \
+                "https://ghcr.io/v2/eh-homelab/${pkg}/manifests/${EH_TAG}"; then
+              echo "::error::ghcr.io/eh-homelab/${pkg} is not public. Make the package public, then re-run this job."
+              rc=1
+            fi
+          done
+          exit $rc
+
+      - name: Summary
+        run: |
+          {
+            echo "### Temporal ${VERSION} images"
+            for pkg in temporal-server temporal-admin-tools; do
+              digest=$(docker buildx imagetools inspect "${REGISTRY}/eh-homelab/${pkg}:${EH_TAG}" --format '{{json .Manifest.Digest}}' | tr -d '"')
+              echo "- \`${REGISTRY}/eh-homelab/${pkg}:${VERSION}@${digest}\`"
+            done
+          } >> "$GITHUB_STEP_SUMMARY"
