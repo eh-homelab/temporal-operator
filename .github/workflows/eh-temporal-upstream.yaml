@@ -1,0 +1,48 @@
+name: Tag eh-homelab Temporal images for a new upstream release
+
+# hack/eh/temporal-upstream/Dockerfile pins the upstream Temporal release, and
+# Dependabot bumps it. When the pin changes on eh/base, this tags
+# temporal-v<version>-eh.1 and runs eh-temporal-images.yaml on that tag.
+#
+# A tag pushed with GITHUB_TOKEN starts no workflow, so the build is started
+# with a dispatch, which does. A version that already has a
+# temporal-v<version>-eh.* tag is not tagged again: a rebuild of the same
+# version is a manual eh.<n+1> tag.
+on:
+  push:
+    branches:
+      - eh/base
+    paths:
+      - hack/eh/temporal-upstream/Dockerfile
+
+permissions:
+  contents: write
+  actions: write
+
+jobs:
+  tag:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Tag and build
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          version=$(sed -n 's/^FROM temporalio\/server:\([0-9][0-9.]*\)$/\1/p' hack/eh/temporal-upstream/Dockerfile)
+          if ! printf '%s' "$version" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$'; then
+            echo "::error::no temporalio/server:<x.y.z> pin in hack/eh/temporal-upstream/Dockerfile"
+            exit 1
+          fi
+          if [ -n "$(git tag -l "temporal-v${version}-eh.*")" ]; then
+            echo "Temporal ${version} is already tagged: $(git tag -l "temporal-v${version}-eh.*" | tr '\n' ' ')"
+            exit 0
+          fi
+          tag="temporal-v${version}-eh.1"
+          git tag "$tag" "$GITHUB_SHA"
+          git push origin "refs/tags/${tag}"
+          gh workflow run eh-temporal-images.yaml --repo "$GITHUB_REPOSITORY" --ref "$tag"
+          echo "### Tagged ${tag} and started eh-temporal-images.yaml" >> "$GITHUB_STEP_SUMMARY"
