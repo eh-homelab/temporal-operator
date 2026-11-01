@@ -43,7 +43,7 @@ jobs:
       - name: Generate release artifacts
         run: make artifacts
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
+        uses: docker/setup-qemu-action@v4
         with:
           platforms: arm64
       - name: Set up Docker Buildx
