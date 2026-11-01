@@ -1,10 +1,11 @@
 name: Tests and build
 
+# eh-homelab fork: also eh/base, the fork's default branch.
 on:
   push:
-    branches: [main]
+    branches: [main, eh/base]
   pull_request:
-    branches: [main]
+    branches: [main, eh/base]
 
 defaults:
   run:

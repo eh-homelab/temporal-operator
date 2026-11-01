@@ -57,8 +57,9 @@ func TestConfigmapBuilderClusterMetadata(t *testing.T) {
 			wantGlobal:   true,
 			wantFailover: 1,
 		},
-		"all fields": {
-			spec: &v1beta1.ClusterMetadataSpec{
+		// gosec G101 matches "cred" in "DCRedirection".
+		"all fields": { //nolint:gosec
+			spec: &v1beta1.ClusterMetadataSpec{ //nolint:gosec
 				EnableGlobalNamespace:  true,
 				InitialFailoverVersion: ptr.To[int64](2),
 				DCRedirectionPolicy:    "selected-apis-forwarding",

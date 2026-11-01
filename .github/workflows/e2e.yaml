@@ -1,10 +1,11 @@
 name: End2End tests
 
+# eh-homelab fork: also eh/base, the fork's default branch.
 on:
   push:
-    branches: [main]
+    branches: [main, eh/base]
   pull_request:
-    branches: [main]
+    branches: [main, eh/base]
 
 defaults:
   run:
