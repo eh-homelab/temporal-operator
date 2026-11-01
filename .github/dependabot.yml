@@ -10,3 +10,8 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+  # The upstream Temporal release that eh-temporal-images.yaml builds.
+  - package-ecosystem: "docker"
+    directory: "/hack/eh/temporal-upstream"
+    schedule:
+      interval: "daily"

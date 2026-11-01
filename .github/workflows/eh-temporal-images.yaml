@@ -5,7 +5,9 @@ name: Publish eh-homelab Temporal images
 # ghcr.io/eh-homelab/temporal-admin-tools.
 #
 # A tag `temporal-v<version>-eh.<n>` builds upstream tag `v<version>` and pushes
-# `<version>` and `<version>-eh.<n>` of both images.
+# `<version>` and `<version>-eh.<n>` of both images. eh-temporal-upstream.yaml
+# makes that tag for each new upstream release and dispatches this workflow on
+# it; a person can push one by hand too.
 #
 # Kept 1:1 with upstream's docker-build-manual.yml: the same build-binaries
 # action (GoReleaser), the same docker-build-helper (binaries, schema, the CLI
@@ -21,6 +23,9 @@ on:
   push:
     tags:
       - 'temporal-v*-eh.*'
+  # Run on a tag by eh-temporal-upstream.yaml. The version job rejects any
+  # ref that is not such a tag.
+  workflow_dispatch:
 
 permissions:
   contents: read
