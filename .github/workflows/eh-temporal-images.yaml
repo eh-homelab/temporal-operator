@@ -67,7 +67,7 @@ jobs:
         arch: [amd64, arm64]
     steps:
       - name: Checkout temporalio/temporal
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           repository: temporalio/temporal
           ref: ${{ needs.version.outputs.ref }}
@@ -97,7 +97,7 @@ jobs:
       EH_TAG: ${{ needs.version.outputs.eh-tag }}
     steps:
       - name: Checkout temporalio/temporal
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           repository: temporalio/temporal
           ref: ${{ needs.version.outputs.ref }}
