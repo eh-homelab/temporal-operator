@@ -38,16 +38,14 @@ type ScheduleIntervalSpec struct {
 	// Every describes the period to repeat the interval.
 	//
 	// +kubebuilder:validation:Required
-	// +kubebuilder:validation:Type=string
-	// +kubebuilder:validation:Pattern=`^[-+]?(0|(([0-9]+(\.[0-9]*)?|\.[0-9]+)(ns|us|µs|μs|ms|s|m|h))+)$`
+	// +kubebuilder:validation:XValidation:rule="duration(self) >= duration('0s')",message="must be a non-negative Go duration such as 720h or 1h30m; units are ns, us, ms, s, m and h"
 	Every metav1.Duration `json:"every"`
 
 	// Offset is a fixed offset added to the intervals period.
 	// Defaults to 0.
 	//
 	// +optional
-	// +kubebuilder:validation:Type=string
-	// +kubebuilder:validation:Pattern=`^[-+]?(0|(([0-9]+(\.[0-9]*)?|\.[0-9]+)(ns|us|µs|μs|ms|s|m|h))+)$`
+	// +kubebuilder:validation:XValidation:rule="duration(self) >= duration('0s')",message="must be a non-negative Go duration such as 720h or 1h30m; units are ns, us, ms, s, m and h"
 	Offset *metav1.Duration `json:"offset,omitempty"`
 }
 
@@ -387,8 +385,7 @@ type ScheduleSpec struct {
 	// Defaults to 0.
 	//
 	// +optional
-	// +kubebuilder:validation:Type=string
-	// +kubebuilder:validation:Pattern=`^[-+]?(0|(([0-9]+(\.[0-9]*)?|\.[0-9]+)(ns|us|µs|μs|ms|s|m|h))+)$`
+	// +kubebuilder:validation:XValidation:rule="duration(self) >= duration('0s')",message="must be a non-negative Go duration such as 720h or 1h30m; units are ns, us, ms, s, m and h"
 	Jitter *metav1.Duration `json:"jitter,omitempty"`
 
 	// TimeZoneName represents the IANA time zone name, for example `US/Pacific`.
@@ -453,8 +450,7 @@ type SchedulePolicies struct {
 	// CatchupWindow controls which missed Actions should be taken at that point.
 	//
 	// +optional
-	// +kubebuilder:validation:Type=string
-	// +kubebuilder:validation:Pattern=`^[-+]?(0|(([0-9]+(\.[0-9]*)?|\.[0-9]+)(ns|us|µs|μs|ms|s|m|h))+)$`
+	// +kubebuilder:validation:XValidation:rule="duration(self) >= duration('0s')",message="must be a non-negative Go duration such as 720h or 1h30m; units are ns, us, ms, s, m and h"
 	CatchupWindow *metav1.Duration `json:"catchupWindow,omitempty"`
 
 	// PauseOnFailure if true, and a workflow run fails or times out, turn on "paused".
@@ -476,8 +472,7 @@ type RetryPolicy struct {
 	// Interval of the first retry. If retryBackoffCoefficient is 1.0 then it is used for all retries.
 	//
 	// +optional
-	// +kubebuilder:validation:Type=string
-	// +kubebuilder:validation:Pattern=`^[-+]?(0|(([0-9]+(\.[0-9]*)?|\.[0-9]+)(ns|us|µs|μs|ms|s|m|h))+)$`
+	// +kubebuilder:validation:XValidation:rule="duration(self) >= duration('0s')",message="must be a non-negative Go duration such as 720h or 1h30m; units are ns, us, ms, s, m and h"
 	InitialInterval *metav1.Duration `json:"initialInterval,omitempty"`
 
 	// Coefficient used to calculate the next retry interval.
@@ -491,8 +486,7 @@ type RetryPolicy struct {
 	// This value is the cap of the increase. Default is 100x of the initial interval.
 	//
 	// +optional
-	// +kubebuilder:validation:Type=string
-	// +kubebuilder:validation:Pattern=`^[-+]?(0|(([0-9]+(\.[0-9]*)?|\.[0-9]+)(ns|us|µs|μs|ms|s|m|h))+)$`
+	// +kubebuilder:validation:XValidation:rule="duration(self) >= duration('0s')",message="must be a non-negative Go duration such as 720h or 1h30m; units are ns, us, ms, s, m and h"
 	MaximumInterval *metav1.Duration `json:"maximumInterval,omitempty"`
 
 	// Maximum number of attempts. When exceeded the retries stop even if not expired yet.
@@ -538,21 +532,18 @@ type ScheduleWorkflowAction struct {
 	// WorkflowExecutionTimeout is the timeout for duration of workflow execution.
 	//
 	// +optional
-	// +kubebuilder:validation:Type=string
-	// +kubebuilder:validation:Pattern=`^[-+]?(0|(([0-9]+(\.[0-9]*)?|\.[0-9]+)(ns|us|µs|μs|ms|s|m|h))+)$`
+	// +kubebuilder:validation:XValidation:rule="duration(self) >= duration('0s')",message="must be a non-negative Go duration such as 720h or 1h30m; units are ns, us, ms, s, m and h"
 	WorkflowExecutionTimeout *metav1.Duration `json:"executionTimeout,omitempty"`
 
 	// WorkflowRunTimeout is the timeout for duration of a single workflow run.
-	// +kubebuilder:validation:Type=string
-	// +kubebuilder:validation:Pattern=`^[-+]?(0|(([0-9]+(\.[0-9]*)?|\.[0-9]+)(ns|us|µs|μs|ms|s|m|h))+)$`
+	// +kubebuilder:validation:XValidation:rule="duration(self) >= duration('0s')",message="must be a non-negative Go duration such as 720h or 1h30m; units are ns, us, ms, s, m and h"
 	WorkflowRunTimeout *metav1.Duration `json:"runTimeout,omitempty"`
 
 	// WorkflowTaskTimeout is The timeout for processing workflow task from the time the worker
 	// pulled this task.
 	//
 	// +optional
-	// +kubebuilder:validation:Type=string
-	// +kubebuilder:validation:Pattern=`^[-+]?(0|(([0-9]+(\.[0-9]*)?|\.[0-9]+)(ns|us|µs|μs|ms|s|m|h))+)$`
+	// +kubebuilder:validation:XValidation:rule="duration(self) >= duration('0s')",message="must be a non-negative Go duration such as 720h or 1h30m; units are ns, us, ms, s, m and h"
 	WorkflowTaskTimeout *metav1.Duration `json:"taskTimeout,omitempty"`
 
 	// NOTE: This is not supported on scheduled workflows

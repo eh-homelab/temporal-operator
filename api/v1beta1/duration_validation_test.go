@@ -23,39 +23,25 @@ import (
 	"go/token"
 	"os"
 	"path/filepath"
-	"regexp"
 	"strings"
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/require"
 )
 
-// durationPattern is the pattern every metav1.Duration field carries. It must
-// match exactly what time.ParseDuration accepts.
-const durationPattern = `^[-+]?(0|(([0-9]+(\.[0-9]*)?|\.[0-9]+)(ns|us|µs|μs|ms|s|m|h))+)$`
+// durationRule is the CEL rule every metav1.Duration field carries. CEL's
+// duration() calls time.ParseDuration, so the API server accepts exactly what
+// the operator can decode. A value it rejects ("30d") would otherwise pass the
+// API server, then fail to decode in the informer and stop the watch for every
+// object of that kind.
+const durationRule = `duration(self) >= duration('0s')`
 
-// A metav1.Duration is a plain string in the CRD. A value time.ParseDuration
-// rejects ("30d") passes the API server, then fails to decode in the informer,
-// which stops the watch for every object of that kind.
-func TestDurationPatternMatchesParseDuration(t *testing.T) {
-	re := regexp.MustCompile(durationPattern)
-	for _, in := range []string{
-		"30d", "1w", "", "h", "1", "1hh", "1 h", "1h ", "--1h", "1.h.5", ".", "1.2.3s",
-		"0", "1h", "720h", "1h30m", "1h0m0s", "1.5h", ".5s", "5.s", "-1h", "+1h",
-		"100ms", "10us", "10µs", "10μs", "3ns", "2h45m30.5s",
-	} {
-		_, err := time.ParseDuration(in)
-		require.Equal(t, err == nil, re.MatchString(in), "%q", in)
-	}
-}
-
-// Every metav1.Duration field in the API types carries the pattern marker.
-func TestDurationFieldsCarryPattern(t *testing.T) {
+// Every metav1.Duration field in the API types carries the rule marker.
+func TestDurationFieldsCarryRule(t *testing.T) {
 	files, err := filepath.Glob("*_types.go")
 	require.NoError(t, err)
 
-	marker := "+kubebuilder:validation:Pattern=`" + durationPattern + "`"
+	marker := `+kubebuilder:validation:XValidation:rule="` + durationRule + `"`
 	fields := 0
 	for _, f := range files {
 		file, err := parser.ParseFile(token.NewFileSet(), f, nil, parser.ParseComments)
@@ -74,16 +60,16 @@ func TestDurationFieldsCarryPattern(t *testing.T) {
 	require.Positive(t, fields)
 }
 
-// The generated CRDs carry the pattern at least once per field (a type used in
+// The generated CRDs carry the rule at least once per field (a type used in
 // two places appears twice). Run `make manifests` after a change.
-func TestCRDsCarryDurationPattern(t *testing.T) {
+func TestCRDsCarryDurationRule(t *testing.T) {
 	files, err := filepath.Glob("../../config/crd/bases/*.yaml")
 	require.NoError(t, err)
 	found := 0
 	for _, f := range files {
 		raw, err := os.ReadFile(f)
 		require.NoError(t, err)
-		found += strings.Count(string(raw), "pattern: "+durationPattern+"\n")
+		found += strings.Count(string(raw), "rule: "+durationRule+"\n")
 	}
 	require.GreaterOrEqual(t, found, countDurationFields(t))
 }

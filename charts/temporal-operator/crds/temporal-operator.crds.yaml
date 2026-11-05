@@ -513,8 +513,11 @@ spec:
                         description: |-
                           RefreshInterval defines the time interval at which temporal should refresh the JWT signing keys from
                           the specified URIs.
-                        pattern: ^[-+]?(0|(([0-9]+(\.[0-9]*)?|\.[0-9]+)(ns|us|µs|μs|ms|s|m|h))+)$
                         type: string
+                        x-kubernetes-validations:
+                        - message: must be a non-negative Go duration such as 720h
+                            or 1h30m; units are ns, us, ms, s, m and h
+                          rule: duration(self) >= duration('0s')
                     type: object
                   permissionsClaimName:
                     description: PermissionsClaimName is the name of the claim within
@@ -556,8 +559,11 @@ spec:
                     description: |-
                       PollInterval defines how often the config should be updated by checking provided values.
                       Defaults to 10s.
-                    pattern: ^[-+]?(0|(([0-9]+(\.[0-9]*)?|\.[0-9]+)(ns|us|µs|μs|ms|s|m|h))+)$
                     type: string
+                    x-kubernetes-validations:
+                    - message: must be a non-negative Go duration such as 720h or
+                        1h30m; units are ns, us, ms, s, m and h
+                      rule: duration(self) >= duration('0s')
                   values:
                     additionalProperties:
                       items:
@@ -753,32 +759,47 @@ spec:
                         description: |-
                           ClientCertificates is the 'duration' (i.e. lifetime) of the client certificates.
                           It defaults to 1 year.
-                        pattern: ^[-+]?(0|(([0-9]+(\.[0-9]*)?|\.[0-9]+)(ns|us|µs|μs|ms|s|m|h))+)$
                         type: string
+                        x-kubernetes-validations:
+                        - message: must be a non-negative Go duration such as 720h
+                            or 1h30m; units are ns, us, ms, s, m and h
+                          rule: duration(self) >= duration('0s')
                       frontendCertificate:
                         description: |-
                           FrontendCertificate is the 'duration' (i.e. lifetime) of the frontend certificate.
                           It defaults to 1 year.
-                        pattern: ^[-+]?(0|(([0-9]+(\.[0-9]*)?|\.[0-9]+)(ns|us|µs|μs|ms|s|m|h))+)$
                         type: string
+                        x-kubernetes-validations:
+                        - message: must be a non-negative Go duration such as 720h
+                            or 1h30m; units are ns, us, ms, s, m and h
+                          rule: duration(self) >= duration('0s')
                       intermediateCAsCertificates:
                         description: |-
                           IntermediateCACertificates is the 'duration' (i.e. lifetime) of the intermediate CAs Certificates.
                           It defaults to 5 years.
-                        pattern: ^[-+]?(0|(([0-9]+(\.[0-9]*)?|\.[0-9]+)(ns|us|µs|μs|ms|s|m|h))+)$
                         type: string
+                        x-kubernetes-validations:
+                        - message: must be a non-negative Go duration such as 720h
+                            or 1h30m; units are ns, us, ms, s, m and h
+                          rule: duration(self) >= duration('0s')
                       internodeCertificate:
                         description: |-
                           InternodeCertificate is the 'duration' (i.e. lifetime) of the internode certificate.
                           It defaults to 1 year.
-                        pattern: ^[-+]?(0|(([0-9]+(\.[0-9]*)?|\.[0-9]+)(ns|us|µs|μs|ms|s|m|h))+)$
                         type: string
+                        x-kubernetes-validations:
+                        - message: must be a non-negative Go duration such as 720h
+                            or 1h30m; units are ns, us, ms, s, m and h
+                          rule: duration(self) >= duration('0s')
                       rootCACertificate:
                         description: |-
                           RootCACertificate is the 'duration' (i.e. lifetime) of the Root CA Certificate.
                           It defaults to 10 years.
-                        pattern: ^[-+]?(0|(([0-9]+(\.[0-9]*)?|\.[0-9]+)(ns|us|µs|μs|ms|s|m|h))+)$
                         type: string
+                        x-kubernetes-validations:
+                        - message: must be a non-negative Go duration such as 720h
+                            or 1h30m; units are ns, us, ms, s, m and h
+                          rule: duration(self) >= duration('0s')
                     type: object
                   frontend:
                     description: |-
@@ -828,16 +849,22 @@ spec:
                       RefreshInterval defines interval between refreshes of certificates in the cluster components.
                       Defaults to 1 hour.
                       Useless if mTLS provider is not cert-manager.
-                    pattern: ^[-+]?(0|(([0-9]+(\.[0-9]*)?|\.[0-9]+)(ns|us|µs|μs|ms|s|m|h))+)$
                     type: string
+                    x-kubernetes-validations:
+                    - message: must be a non-negative Go duration such as 720h or
+                        1h30m; units are ns, us, ms, s, m and h
+                      rule: duration(self) >= duration('0s')
                   renewBefore:
                     description: |-
                       RenewBefore is defines how long before the currently issued certificate's expiry
                       cert-manager should renew the certificate. The default is 2/3 of the
                       issued certificate's duration. Minimum accepted value is 5 minutes.
                       Useless if mTLS provider is not cert-manager.
-                    pattern: ^[-+]?(0|(([0-9]+(\.[0-9]*)?|\.[0-9]+)(ns|us|µs|μs|ms|s|m|h))+)$
                     type: string
+                    x-kubernetes-validations:
+                    - message: must be a non-negative Go duration such as 720h or
+                        1h30m; units are ns, us, ms, s, m and h
+                      rule: duration(self) >= duration('0s')
                 type: object
               metrics:
                 description: Metrics allows configuration of scraping endpoints for
@@ -2295,8 +2322,11 @@ spec:
                           connectTimeout:
                             description: ConnectTimeout is a timeout for initial dial
                               to cassandra server.
-                            pattern: ^[-+]?(0|(([0-9]+(\.[0-9]*)?|\.[0-9]+)(ns|us|µs|μs|ms|s|m|h))+)$
                             type: string
+                            x-kubernetes-validations:
+                            - message: must be a non-negative Go duration such as
+                                720h or 1h30m; units are ns, us, ms, s, m and h
+                              rule: duration(self) >= duration('0s')
                           consistency:
                             description: Consistency configuration.
                             properties:
@@ -2365,8 +2395,11 @@ spec:
                           closeIdleConnectionsInterval:
                             description: CloseIdleConnectionsInterval is the max duration
                               a connection stay open while idle.
-                            pattern: ^[-+]?(0|(([0-9]+(\.[0-9]*)?|\.[0-9]+)(ns|us|µs|μs|ms|s|m|h))+)$
                             type: string
+                            x-kubernetes-validations:
+                            - message: must be a non-negative Go duration such as
+                                720h or 1h30m; units are ns, us, ms, s, m and h
+                              rule: duration(self) >= duration('0s')
                           enableHealthcheck:
                             description: EnableHealthcheck enables or disables healthcheck
                               on the temporal cluster's es client.
@@ -2468,8 +2501,11 @@ spec:
                           maxConnLifetime:
                             description: MaxConnLifetime is the maximum time a connection
                               can be alive
-                            pattern: ^[-+]?(0|(([0-9]+(\.[0-9]*)?|\.[0-9]+)(ns|us|µs|μs|ms|s|m|h))+)$
                             type: string
+                            x-kubernetes-validations:
+                            - message: must be a non-negative Go duration such as
+                                720h or 1h30m; units are ns, us, ms, s, m and h
+                              rule: duration(self) >= duration('0s')
                           maxConns:
                             description: MaxConns the max number of connections to
                               this datastore.
@@ -2501,8 +2537,12 @@ spec:
                                 description: |-
                                   Timeout is the maximum duration to wait for the command to complete.
                                   Defaults to 30 seconds if unset.
-                                pattern: ^[-+]?(0|(([0-9]+(\.[0-9]*)?|\.[0-9]+)(ns|us|µs|μs|ms|s|m|h))+)$
                                 type: string
+                                x-kubernetes-validations:
+                                - message: must be a non-negative Go duration such
+                                    as 720h or 1h30m; units are ns, us, ms, s, m and
+                                    h
+                                  rule: duration(self) >= duration('0s')
                             required:
                             - command
                             type: object
@@ -2597,8 +2637,11 @@ spec:
                           connectTimeout:
                             description: ConnectTimeout is a timeout for initial dial
                               to cassandra server.
-                            pattern: ^[-+]?(0|(([0-9]+(\.[0-9]*)?|\.[0-9]+)(ns|us|µs|μs|ms|s|m|h))+)$
                             type: string
+                            x-kubernetes-validations:
+                            - message: must be a non-negative Go duration such as
+                                720h or 1h30m; units are ns, us, ms, s, m and h
+                              rule: duration(self) >= duration('0s')
                           consistency:
                             description: Consistency configuration.
                             properties:
@@ -2667,8 +2710,11 @@ spec:
                           closeIdleConnectionsInterval:
                             description: CloseIdleConnectionsInterval is the max duration
                               a connection stay open while idle.
-                            pattern: ^[-+]?(0|(([0-9]+(\.[0-9]*)?|\.[0-9]+)(ns|us|µs|μs|ms|s|m|h))+)$
                             type: string
+                            x-kubernetes-validations:
+                            - message: must be a non-negative Go duration such as
+                                720h or 1h30m; units are ns, us, ms, s, m and h
+                              rule: duration(self) >= duration('0s')
                           enableHealthcheck:
                             description: EnableHealthcheck enables or disables healthcheck
                               on the temporal cluster's es client.
@@ -2770,8 +2816,11 @@ spec:
                           maxConnLifetime:
                             description: MaxConnLifetime is the maximum time a connection
                               can be alive
-                            pattern: ^[-+]?(0|(([0-9]+(\.[0-9]*)?|\.[0-9]+)(ns|us|µs|μs|ms|s|m|h))+)$
                             type: string
+                            x-kubernetes-validations:
+                            - message: must be a non-negative Go duration such as
+                                720h or 1h30m; units are ns, us, ms, s, m and h
+                              rule: duration(self) >= duration('0s')
                           maxConns:
                             description: MaxConns the max number of connections to
                               this datastore.
@@ -2803,8 +2852,12 @@ spec:
                                 description: |-
                                   Timeout is the maximum duration to wait for the command to complete.
                                   Defaults to 30 seconds if unset.
-                                pattern: ^[-+]?(0|(([0-9]+(\.[0-9]*)?|\.[0-9]+)(ns|us|µs|μs|ms|s|m|h))+)$
                                 type: string
+                                x-kubernetes-validations:
+                                - message: must be a non-negative Go duration such
+                                    as 720h or 1h30m; units are ns, us, ms, s, m and
+                                    h
+                                  rule: duration(self) >= duration('0s')
                             required:
                             - command
                             type: object
@@ -2901,8 +2954,11 @@ spec:
                           connectTimeout:
                             description: ConnectTimeout is a timeout for initial dial
                               to cassandra server.
-                            pattern: ^[-+]?(0|(([0-9]+(\.[0-9]*)?|\.[0-9]+)(ns|us|µs|μs|ms|s|m|h))+)$
                             type: string
+                            x-kubernetes-validations:
+                            - message: must be a non-negative Go duration such as
+                                720h or 1h30m; units are ns, us, ms, s, m and h
+                              rule: duration(self) >= duration('0s')
                           consistency:
                             description: Consistency configuration.
                             properties:
@@ -2971,8 +3027,11 @@ spec:
                           closeIdleConnectionsInterval:
                             description: CloseIdleConnectionsInterval is the max duration
                               a connection stay open while idle.
-                            pattern: ^[-+]?(0|(([0-9]+(\.[0-9]*)?|\.[0-9]+)(ns|us|µs|μs|ms|s|m|h))+)$
                             type: string
+                            x-kubernetes-validations:
+                            - message: must be a non-negative Go duration such as
+                                720h or 1h30m; units are ns, us, ms, s, m and h
+                              rule: duration(self) >= duration('0s')
                           enableHealthcheck:
                             description: EnableHealthcheck enables or disables healthcheck
                               on the temporal cluster's es client.
@@ -3074,8 +3133,11 @@ spec:
                           maxConnLifetime:
                             description: MaxConnLifetime is the maximum time a connection
                               can be alive
-                            pattern: ^[-+]?(0|(([0-9]+(\.[0-9]*)?|\.[0-9]+)(ns|us|µs|μs|ms|s|m|h))+)$
                             type: string
+                            x-kubernetes-validations:
+                            - message: must be a non-negative Go duration such as
+                                720h or 1h30m; units are ns, us, ms, s, m and h
+                              rule: duration(self) >= duration('0s')
                           maxConns:
                             description: MaxConns the max number of connections to
                               this datastore.
@@ -3107,8 +3169,12 @@ spec:
                                 description: |-
                                   Timeout is the maximum duration to wait for the command to complete.
                                   Defaults to 30 seconds if unset.
-                                pattern: ^[-+]?(0|(([0-9]+(\.[0-9]*)?|\.[0-9]+)(ns|us|µs|μs|ms|s|m|h))+)$
                                 type: string
+                                x-kubernetes-validations:
+                                - message: must be a non-negative Go duration such
+                                    as 720h or 1h30m; units are ns, us, ms, s, m and
+                                    h
+                                  rule: duration(self) >= duration('0s')
                             required:
                             - command
                             type: object
@@ -3203,8 +3269,11 @@ spec:
                           connectTimeout:
                             description: ConnectTimeout is a timeout for initial dial
                               to cassandra server.
-                            pattern: ^[-+]?(0|(([0-9]+(\.[0-9]*)?|\.[0-9]+)(ns|us|µs|μs|ms|s|m|h))+)$
                             type: string
+                            x-kubernetes-validations:
+                            - message: must be a non-negative Go duration such as
+                                720h or 1h30m; units are ns, us, ms, s, m and h
+                              rule: duration(self) >= duration('0s')
                           consistency:
                             description: Consistency configuration.
                             properties:
@@ -3273,8 +3342,11 @@ spec:
                           closeIdleConnectionsInterval:
                             description: CloseIdleConnectionsInterval is the max duration
                               a connection stay open while idle.
-                            pattern: ^[-+]?(0|(([0-9]+(\.[0-9]*)?|\.[0-9]+)(ns|us|µs|μs|ms|s|m|h))+)$
                             type: string
+                            x-kubernetes-validations:
+                            - message: must be a non-negative Go duration such as
+                                720h or 1h30m; units are ns, us, ms, s, m and h
+                              rule: duration(self) >= duration('0s')
                           enableHealthcheck:
                             description: EnableHealthcheck enables or disables healthcheck
                               on the temporal cluster's es client.
@@ -3376,8 +3448,11 @@ spec:
                           maxConnLifetime:
                             description: MaxConnLifetime is the maximum time a connection
                               can be alive
-                            pattern: ^[-+]?(0|(([0-9]+(\.[0-9]*)?|\.[0-9]+)(ns|us|µs|μs|ms|s|m|h))+)$
                             type: string
+                            x-kubernetes-validations:
+                            - message: must be a non-negative Go duration such as
+                                720h or 1h30m; units are ns, us, ms, s, m and h
+                              rule: duration(self) >= duration('0s')
                           maxConns:
                             description: MaxConns the max number of connections to
                               this datastore.
@@ -3409,8 +3484,12 @@ spec:
                                 description: |-
                                   Timeout is the maximum duration to wait for the command to complete.
                                   Defaults to 30 seconds if unset.
-                                pattern: ^[-+]?(0|(([0-9]+(\.[0-9]*)?|\.[0-9]+)(ns|us|µs|μs|ms|s|m|h))+)$
                                 type: string
+                                x-kubernetes-validations:
+                                - message: must be a non-negative Go duration such
+                                    as 720h or 1h30m; units are ns, us, ms, s, m and
+                                    h
+                                  rule: duration(self) >= duration('0s')
                             required:
                             - command
                             type: object
@@ -5022,8 +5101,11 @@ spec:
                 type: string
               retentionPeriod:
                 description: RetentionPeriod to apply on closed workflow executions.
-                pattern: ^[-+]?(0|(([0-9]+(\.[0-9]*)?|\.[0-9]+)(ns|us|µs|μs|ms|s|m|h))+)$
                 type: string
+                x-kubernetes-validations:
+                - message: must be a non-negative Go duration such as 720h or 1h30m;
+                    units are ns, us, ms, s, m and h
+                  rule: duration(self) >= duration('0s')
               securityToken:
                 type: string
             required:
@@ -5188,8 +5270,11 @@ spec:
                           executionTimeout:
                             description: WorkflowExecutionTimeout is the timeout for
                               duration of workflow execution.
-                            pattern: ^[-+]?(0|(([0-9]+(\.[0-9]*)?|\.[0-9]+)(ns|us|µs|μs|ms|s|m|h))+)$
                             type: string
+                            x-kubernetes-validations:
+                            - message: must be a non-negative Go duration such as
+                                720h or 1h30m; units are ns, us, ms, s, m and h
+                              rule: duration(self) >= duration('0s')
                           id:
                             description: |-
                               WorkflowID represents the business identifier of the workflow execution.
@@ -5225,8 +5310,12 @@ spec:
                               initialInterval:
                                 description: Interval of the first retry. If retryBackoffCoefficient
                                   is 1.0 then it is used for all retries.
-                                pattern: ^[-+]?(0|(([0-9]+(\.[0-9]*)?|\.[0-9]+)(ns|us|µs|μs|ms|s|m|h))+)$
                                 type: string
+                                x-kubernetes-validations:
+                                - message: must be a non-negative Go duration such
+                                    as 720h or 1h30m; units are ns, us, ms, s, m and
+                                    h
+                                  rule: duration(self) >= duration('0s')
                               maximumAttempts:
                                 description: |-
                                   Maximum number of attempts. When exceeded the retries stop even if not expired yet.
@@ -5237,8 +5326,12 @@ spec:
                                 description: |-
                                   Maximum interval between retries. Exponential backoff leads to interval increase.
                                   This value is the cap of the increase. Default is 100x of the initial interval.
-                                pattern: ^[-+]?(0|(([0-9]+(\.[0-9]*)?|\.[0-9]+)(ns|us|µs|μs|ms|s|m|h))+)$
                                 type: string
+                                x-kubernetes-validations:
+                                - message: must be a non-negative Go duration such
+                                    as 720h or 1h30m; units are ns, us, ms, s, m and
+                                    h
+                                  rule: duration(self) >= duration('0s')
                               nonRetryableErrorTypes:
                                 description: |-
                                   Non-Retryable errors types. Will stop retrying if the error type matches this list. Note that
@@ -5250,8 +5343,11 @@ spec:
                           runTimeout:
                             description: WorkflowRunTimeout is the timeout for duration
                               of a single workflow run.
-                            pattern: ^[-+]?(0|(([0-9]+(\.[0-9]*)?|\.[0-9]+)(ns|us|µs|μs|ms|s|m|h))+)$
                             type: string
+                            x-kubernetes-validations:
+                            - message: must be a non-negative Go duration such as
+                                720h or 1h30m; units are ns, us, ms, s, m and h
+                              rule: duration(self) >= duration('0s')
                           searchAttributes:
                             description: |-
                               SearchAttributes is optional indexed info that can be used in query of List/Scan/Count workflow APIs. The key
@@ -5270,8 +5366,11 @@ spec:
                             description: |-
                               WorkflowTaskTimeout is The timeout for processing workflow task from the time the worker
                               pulled this task.
-                            pattern: ^[-+]?(0|(([0-9]+(\.[0-9]*)?|\.[0-9]+)(ns|us|µs|μs|ms|s|m|h))+)$
                             type: string
+                            x-kubernetes-validations:
+                            - message: must be a non-negative Go duration such as
+                                720h or 1h30m; units are ns, us, ms, s, m and h
+                              rule: duration(self) >= duration('0s')
                           type:
                             description: |-
                               WorkflowType represents the identifier used by a workflow author to define the workflow
@@ -5293,8 +5392,11 @@ spec:
                           CatchupWindow The Temporal Server might be down or unavailable at the time
                           when a Schedule should take an Action. When the Server comes back up,
                           CatchupWindow controls which missed Actions should be taken at that point.
-                        pattern: ^[-+]?(0|(([0-9]+(\.[0-9]*)?|\.[0-9]+)(ns|us|µs|μs|ms|s|m|h))+)$
                         type: string
+                        x-kubernetes-validations:
+                        - message: must be a non-negative Go duration such as 720h
+                            or 1h30m; units are ns, us, ms, s, m and h
+                          rule: duration(self) >= duration('0s')
                       overlap:
                         description: |-
                           Overlap controls what happens when an Action would be started by a
@@ -5962,14 +6064,20 @@ spec:
                             every:
                               description: Every describes the period to repeat the
                                 interval.
-                              pattern: ^[-+]?(0|(([0-9]+(\.[0-9]*)?|\.[0-9]+)(ns|us|µs|μs|ms|s|m|h))+)$
                               type: string
+                              x-kubernetes-validations:
+                              - message: must be a non-negative Go duration such as
+                                  720h or 1h30m; units are ns, us, ms, s, m and h
+                                rule: duration(self) >= duration('0s')
                             offset:
                               description: |-
                                 Offset is a fixed offset added to the intervals period.
                                 Defaults to 0.
-                              pattern: ^[-+]?(0|(([0-9]+(\.[0-9]*)?|\.[0-9]+)(ns|us|µs|μs|ms|s|m|h))+)$
                               type: string
+                              x-kubernetes-validations:
+                              - message: must be a non-negative Go duration such as
+                                  720h or 1h30m; units are ns, us, ms, s, m and h
+                                rule: duration(self) >= duration('0s')
                           required:
                           - every
                           type: object
@@ -5980,8 +6088,11 @@ spec:
                           All times will be incremented by a random value from 0 to this amount of jitter, capped
                           by the time until the next schedule.
                           Defaults to 0.
-                        pattern: ^[-+]?(0|(([0-9]+(\.[0-9]*)?|\.[0-9]+)(ns|us|µs|μs|ms|s|m|h))+)$
                         type: string
+                        x-kubernetes-validations:
+                        - message: must be a non-negative Go duration such as 720h
+                            or 1h30m; units are ns, us, ms, s, m and h
+                          rule: duration(self) >= duration('0s')
                       startAt:
                         description: |-
                           StartAt represents the start of the schedule. Any times before `startAt` will be skipped.
