@@ -88,6 +88,10 @@ spec:
                             description: WorkflowExecutionTimeout is the timeout for
                               duration of workflow execution.
                             type: string
+                            x-kubernetes-validations:
+                            - message: must be a non-negative Go duration such as
+                                720h or 1h30m; units are ns, us, ms, s, m and h
+                              rule: duration(self) >= duration('0s')
                           id:
                             description: |-
                               WorkflowID represents the business identifier of the workflow execution.
@@ -124,6 +128,11 @@ spec:
                                 description: Interval of the first retry. If retryBackoffCoefficient
                                   is 1.0 then it is used for all retries.
                                 type: string
+                                x-kubernetes-validations:
+                                - message: must be a non-negative Go duration such
+                                    as 720h or 1h30m; units are ns, us, ms, s, m and
+                                    h
+                                  rule: duration(self) >= duration('0s')
                               maximumAttempts:
                                 description: |-
                                   Maximum number of attempts. When exceeded the retries stop even if not expired yet.
@@ -135,6 +144,11 @@ spec:
                                   Maximum interval between retries. Exponential backoff leads to interval increase.
                                   This value is the cap of the increase. Default is 100x of the initial interval.
                                 type: string
+                                x-kubernetes-validations:
+                                - message: must be a non-negative Go duration such
+                                    as 720h or 1h30m; units are ns, us, ms, s, m and
+                                    h
+                                  rule: duration(self) >= duration('0s')
                               nonRetryableErrorTypes:
                                 description: |-
                                   Non-Retryable errors types. Will stop retrying if the error type matches this list. Note that
@@ -147,6 +161,10 @@ spec:
                             description: WorkflowRunTimeout is the timeout for duration
                               of a single workflow run.
                             type: string
+                            x-kubernetes-validations:
+                            - message: must be a non-negative Go duration such as
+                                720h or 1h30m; units are ns, us, ms, s, m and h
+                              rule: duration(self) >= duration('0s')
                           searchAttributes:
                             description: |-
                               SearchAttributes is optional indexed info that can be used in query of List/Scan/Count workflow APIs. The key
@@ -166,6 +184,10 @@ spec:
                               WorkflowTaskTimeout is The timeout for processing workflow task from the time the worker
                               pulled this task.
                             type: string
+                            x-kubernetes-validations:
+                            - message: must be a non-negative Go duration such as
+                                720h or 1h30m; units are ns, us, ms, s, m and h
+                              rule: duration(self) >= duration('0s')
                           type:
                             description: |-
                               WorkflowType represents the identifier used by a workflow author to define the workflow
@@ -188,6 +210,10 @@ spec:
                           when a Schedule should take an Action. When the Server comes back up,
                           CatchupWindow controls which missed Actions should be taken at that point.
                         type: string
+                        x-kubernetes-validations:
+                        - message: must be a non-negative Go duration such as 720h
+                            or 1h30m; units are ns, us, ms, s, m and h
+                          rule: duration(self) >= duration('0s')
                       overlap:
                         description: |-
                           Overlap controls what happens when an Action would be started by a
@@ -856,11 +882,19 @@ spec:
                               description: Every describes the period to repeat the
                                 interval.
                               type: string
+                              x-kubernetes-validations:
+                              - message: must be a non-negative Go duration such as
+                                  720h or 1h30m; units are ns, us, ms, s, m and h
+                                rule: duration(self) >= duration('0s')
                             offset:
                               description: |-
                                 Offset is a fixed offset added to the intervals period.
                                 Defaults to 0.
                               type: string
+                              x-kubernetes-validations:
+                              - message: must be a non-negative Go duration such as
+                                  720h or 1h30m; units are ns, us, ms, s, m and h
+                                rule: duration(self) >= duration('0s')
                           required:
                           - every
                           type: object
@@ -872,6 +906,10 @@ spec:
                           by the time until the next schedule.
                           Defaults to 0.
                         type: string
+                        x-kubernetes-validations:
+                        - message: must be a non-negative Go duration such as 720h
+                            or 1h30m; units are ns, us, ms, s, m and h
+                          rule: duration(self) >= duration('0s')
                       startAt:
                         description: |-
                           StartAt represents the start of the schedule. Any times before `startAt` will be skipped.

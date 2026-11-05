@@ -400,6 +400,9 @@ spec:
                             RefreshInterval defines the time interval at which temporal should refresh the JWT signing keys from
                             the specified URIs.
                           type: string
+                          x-kubernetes-validations:
+                            - message: must be a non-negative Go duration such as 720h or 1h30m; units are ns, us, ms, s, m and h
+                              rule: duration(self) >= duration('0s')
                       type: object
                     permissionsClaimName:
                       description: PermissionsClaimName is the name of the claim within the JWT token that contains the user's permissions.
@@ -438,6 +441,9 @@ spec:
                         PollInterval defines how often the config should be updated by checking provided values.
                         Defaults to 10s.
                       type: string
+                      x-kubernetes-validations:
+                        - message: must be a non-negative Go duration such as 720h or 1h30m; units are ns, us, ms, s, m and h
+                          rule: duration(self) >= duration('0s')
                     values:
                       additionalProperties:
                         items:
@@ -628,26 +634,41 @@ spec:
                             ClientCertificates is the 'duration' (i.e. lifetime) of the client certificates.
                             It defaults to 1 year.
                           type: string
+                          x-kubernetes-validations:
+                            - message: must be a non-negative Go duration such as 720h or 1h30m; units are ns, us, ms, s, m and h
+                              rule: duration(self) >= duration('0s')
                         frontendCertificate:
                           description: |-
                             FrontendCertificate is the 'duration' (i.e. lifetime) of the frontend certificate.
                             It defaults to 1 year.
                           type: string
+                          x-kubernetes-validations:
+                            - message: must be a non-negative Go duration such as 720h or 1h30m; units are ns, us, ms, s, m and h
+                              rule: duration(self) >= duration('0s')
                         intermediateCAsCertificates:
                           description: |-
                             IntermediateCACertificates is the 'duration' (i.e. lifetime) of the intermediate CAs Certificates.
                             It defaults to 5 years.
                           type: string
+                          x-kubernetes-validations:
+                            - message: must be a non-negative Go duration such as 720h or 1h30m; units are ns, us, ms, s, m and h
+                              rule: duration(self) >= duration('0s')
                         internodeCertificate:
                           description: |-
                             InternodeCertificate is the 'duration' (i.e. lifetime) of the internode certificate.
                             It defaults to 1 year.
                           type: string
+                          x-kubernetes-validations:
+                            - message: must be a non-negative Go duration such as 720h or 1h30m; units are ns, us, ms, s, m and h
+                              rule: duration(self) >= duration('0s')
                         rootCACertificate:
                           description: |-
                             RootCACertificate is the 'duration' (i.e. lifetime) of the Root CA Certificate.
                             It defaults to 10 years.
                           type: string
+                          x-kubernetes-validations:
+                            - message: must be a non-negative Go duration such as 720h or 1h30m; units are ns, us, ms, s, m and h
+                              rule: duration(self) >= duration('0s')
                       type: object
                     frontend:
                       description: |-
@@ -696,6 +717,9 @@ spec:
                         Defaults to 1 hour.
                         Useless if mTLS provider is not cert-manager.
                       type: string
+                      x-kubernetes-validations:
+                        - message: must be a non-negative Go duration such as 720h or 1h30m; units are ns, us, ms, s, m and h
+                          rule: duration(self) >= duration('0s')
                     renewBefore:
                       description: |-
                         RenewBefore is defines how long before the currently issued certificate's expiry
@@ -703,6 +727,9 @@ spec:
                         issued certificate's duration. Minimum accepted value is 5 minutes.
                         Useless if mTLS provider is not cert-manager.
                       type: string
+                      x-kubernetes-validations:
+                        - message: must be a non-negative Go duration such as 720h or 1h30m; units are ns, us, ms, s, m and h
+                          rule: duration(self) >= duration('0s')
                   type: object
                 metrics:
                   description: Metrics allows configuration of scraping endpoints for stats. prometheus or m3.
@@ -2043,6 +2070,9 @@ spec:
                             connectTimeout:
                               description: ConnectTimeout is a timeout for initial dial to cassandra server.
                               type: string
+                              x-kubernetes-validations:
+                                - message: must be a non-negative Go duration such as 720h or 1h30m; units are ns, us, ms, s, m and h
+                                  rule: duration(self) >= duration('0s')
                             consistency:
                               description: Consistency configuration.
                               properties:
@@ -2105,6 +2135,9 @@ spec:
                             closeIdleConnectionsInterval:
                               description: CloseIdleConnectionsInterval is the max duration a connection stay open while idle.
                               type: string
+                              x-kubernetes-validations:
+                                - message: must be a non-negative Go duration such as 720h or 1h30m; units are ns, us, ms, s, m and h
+                                  rule: duration(self) >= duration('0s')
                             enableHealthcheck:
                               description: EnableHealthcheck enables or disables healthcheck on the temporal cluster's es client.
                               type: boolean
@@ -2191,6 +2224,9 @@ spec:
                             maxConnLifetime:
                               description: MaxConnLifetime is the maximum time a connection can be alive
                               type: string
+                              x-kubernetes-validations:
+                                - message: must be a non-negative Go duration such as 720h or 1h30m; units are ns, us, ms, s, m and h
+                                  rule: duration(self) >= duration('0s')
                             maxConns:
                               description: MaxConns the max number of connections to this datastore.
                               type: integer
@@ -2219,6 +2255,9 @@ spec:
                                     Timeout is the maximum duration to wait for the command to complete.
                                     Defaults to 30 seconds if unset.
                                   type: string
+                                  x-kubernetes-validations:
+                                    - message: must be a non-negative Go duration such as 720h or 1h30m; units are ns, us, ms, s, m and h
+                                      rule: duration(self) >= duration('0s')
                               required:
                                 - command
                               type: object
@@ -2306,6 +2345,9 @@ spec:
                             connectTimeout:
                               description: ConnectTimeout is a timeout for initial dial to cassandra server.
                               type: string
+                              x-kubernetes-validations:
+                                - message: must be a non-negative Go duration such as 720h or 1h30m; units are ns, us, ms, s, m and h
+                                  rule: duration(self) >= duration('0s')
                             consistency:
                               description: Consistency configuration.
                               properties:
@@ -2368,6 +2410,9 @@ spec:
                             closeIdleConnectionsInterval:
                               description: CloseIdleConnectionsInterval is the max duration a connection stay open while idle.
                               type: string
+                              x-kubernetes-validations:
+                                - message: must be a non-negative Go duration such as 720h or 1h30m; units are ns, us, ms, s, m and h
+                                  rule: duration(self) >= duration('0s')
                             enableHealthcheck:
                               description: EnableHealthcheck enables or disables healthcheck on the temporal cluster's es client.
                               type: boolean
@@ -2454,6 +2499,9 @@ spec:
                             maxConnLifetime:
                               description: MaxConnLifetime is the maximum time a connection can be alive
                               type: string
+                              x-kubernetes-validations:
+                                - message: must be a non-negative Go duration such as 720h or 1h30m; units are ns, us, ms, s, m and h
+                                  rule: duration(self) >= duration('0s')
                             maxConns:
                               description: MaxConns the max number of connections to this datastore.
                               type: integer
@@ -2482,6 +2530,9 @@ spec:
                                     Timeout is the maximum duration to wait for the command to complete.
                                     Defaults to 30 seconds if unset.
                                   type: string
+                                  x-kubernetes-validations:
+                                    - message: must be a non-negative Go duration such as 720h or 1h30m; units are ns, us, ms, s, m and h
+                                      rule: duration(self) >= duration('0s')
                               required:
                                 - command
                               type: object
@@ -2571,6 +2622,9 @@ spec:
                             connectTimeout:
                               description: ConnectTimeout is a timeout for initial dial to cassandra server.
                               type: string
+                              x-kubernetes-validations:
+                                - message: must be a non-negative Go duration such as 720h or 1h30m; units are ns, us, ms, s, m and h
+                                  rule: duration(self) >= duration('0s')
                             consistency:
                               description: Consistency configuration.
                               properties:
@@ -2633,6 +2687,9 @@ spec:
                             closeIdleConnectionsInterval:
                               description: CloseIdleConnectionsInterval is the max duration a connection stay open while idle.
                               type: string
+                              x-kubernetes-validations:
+                                - message: must be a non-negative Go duration such as 720h or 1h30m; units are ns, us, ms, s, m and h
+                                  rule: duration(self) >= duration('0s')
                             enableHealthcheck:
                               description: EnableHealthcheck enables or disables healthcheck on the temporal cluster's es client.
                               type: boolean
@@ -2719,6 +2776,9 @@ spec:
                             maxConnLifetime:
                               description: MaxConnLifetime is the maximum time a connection can be alive
                               type: string
+                              x-kubernetes-validations:
+                                - message: must be a non-negative Go duration such as 720h or 1h30m; units are ns, us, ms, s, m and h
+                                  rule: duration(self) >= duration('0s')
                             maxConns:
                               description: MaxConns the max number of connections to this datastore.
                               type: integer
@@ -2747,6 +2807,9 @@ spec:
                                     Timeout is the maximum duration to wait for the command to complete.
                                     Defaults to 30 seconds if unset.
                                   type: string
+                                  x-kubernetes-validations:
+                                    - message: must be a non-negative Go duration such as 720h or 1h30m; units are ns, us, ms, s, m and h
+                                      rule: duration(self) >= duration('0s')
                               required:
                                 - command
                               type: object
@@ -2834,6 +2897,9 @@ spec:
                             connectTimeout:
                               description: ConnectTimeout is a timeout for initial dial to cassandra server.
                               type: string
+                              x-kubernetes-validations:
+                                - message: must be a non-negative Go duration such as 720h or 1h30m; units are ns, us, ms, s, m and h
+                                  rule: duration(self) >= duration('0s')
                             consistency:
                               description: Consistency configuration.
                               properties:
@@ -2896,6 +2962,9 @@ spec:
                             closeIdleConnectionsInterval:
                               description: CloseIdleConnectionsInterval is the max duration a connection stay open while idle.
                               type: string
+                              x-kubernetes-validations:
+                                - message: must be a non-negative Go duration such as 720h or 1h30m; units are ns, us, ms, s, m and h
+                                  rule: duration(self) >= duration('0s')
                             enableHealthcheck:
                               description: EnableHealthcheck enables or disables healthcheck on the temporal cluster's es client.
                               type: boolean
@@ -2982,6 +3051,9 @@ spec:
                             maxConnLifetime:
                               description: MaxConnLifetime is the maximum time a connection can be alive
                               type: string
+                              x-kubernetes-validations:
+                                - message: must be a non-negative Go duration such as 720h or 1h30m; units are ns, us, ms, s, m and h
+                                  rule: duration(self) >= duration('0s')
                             maxConns:
                               description: MaxConns the max number of connections to this datastore.
                               type: integer
@@ -3010,6 +3082,9 @@ spec:
                                     Timeout is the maximum duration to wait for the command to complete.
                                     Defaults to 30 seconds if unset.
                                   type: string
+                                  x-kubernetes-validations:
+                                    - message: must be a non-negative Go duration such as 720h or 1h30m; units are ns, us, ms, s, m and h
+                                      rule: duration(self) >= duration('0s')
                               required:
                                 - command
                               type: object

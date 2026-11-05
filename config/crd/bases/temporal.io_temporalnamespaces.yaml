@@ -160,6 +160,10 @@ spec:
               retentionPeriod:
                 description: RetentionPeriod to apply on closed workflow executions.
                 type: string
+                x-kubernetes-validations:
+                - message: must be a non-negative Go duration such as 720h or 1h30m;
+                    units are ns, us, ms, s, m and h
+                  rule: duration(self) >= duration('0s')
               securityToken:
                 type: string
             required:

@@ -247,6 +247,7 @@ type SQLSpec struct {
 	MaxIdleConns int `json:"maxIdleConns"`
 	// MaxConnLifetime is the maximum time a connection can be alive
 	// +optional
+	// +kubebuilder:validation:XValidation:rule="duration(self) >= duration('0s')",message="must be a non-negative Go duration such as 720h or 1h30m; units are ns, us, ms, s, m and h"
 	MaxConnLifetime metav1.Duration `json:"maxConnLifetime"`
 	// TaskScanPartitions is the number of partitions to sequentially scan during ListTaskQueue operations.
 	// +optional
@@ -275,6 +276,7 @@ type SQLPasswordCommandSpec struct {
 	// Timeout is the maximum duration to wait for the command to complete.
 	// Defaults to 30 seconds if unset.
 	// +optional
+	// +kubebuilder:validation:XValidation:rule="duration(self) >= duration('0s')",message="must be a non-negative Go duration such as 720h or 1h30m; units are ns, us, ms, s, m and h"
 	Timeout *metav1.Duration `json:"timeout,omitempty"`
 }
 
@@ -326,6 +328,7 @@ type ElasticsearchSpec struct {
 	LogLevel string `json:"logLevel"`
 	// CloseIdleConnectionsInterval is the max duration a connection stay open while idle.
 	// +optional
+	// +kubebuilder:validation:XValidation:rule="duration(self) >= duration('0s')",message="must be a non-negative Go duration such as 720h or 1h30m; units are ns, us, ms, s, m and h"
 	CloseIdleConnectionsInterval metav1.Duration `json:"closeIdleConnectionsInterval"`
 	// EnableSniff enables or disables sniffer on the temporal cluster's es client.
 	// +optional
@@ -367,6 +370,7 @@ type CassandraSpec struct {
 	MaxConns int `json:"maxConns"`
 	// ConnectTimeout is a timeout for initial dial to cassandra server.
 	// +optional
+	// +kubebuilder:validation:XValidation:rule="duration(self) >= duration('0s')",message="must be a non-negative Go duration such as 720h or 1h30m; units are ns, us, ms, s, m and h"
 	ConnectTimeout *metav1.Duration `json:"connectTimeout"`
 	// Consistency configuration.
 	// +optional
@@ -693,22 +697,27 @@ type CertificatesDurationSpec struct {
 	// RootCACertificate is the 'duration' (i.e. lifetime) of the Root CA Certificate.
 	// It defaults to 10 years.
 	// +optional
+	// +kubebuilder:validation:XValidation:rule="duration(self) >= duration('0s')",message="must be a non-negative Go duration such as 720h or 1h30m; units are ns, us, ms, s, m and h"
 	RootCACertificate *metav1.Duration `json:"rootCACertificate"` //nolint:tagliatelle
 	// IntermediateCACertificates is the 'duration' (i.e. lifetime) of the intermediate CAs Certificates.
 	// It defaults to 5 years.
 	// +optional
+	// +kubebuilder:validation:XValidation:rule="duration(self) >= duration('0s')",message="must be a non-negative Go duration such as 720h or 1h30m; units are ns, us, ms, s, m and h"
 	IntermediateCAsCertificates *metav1.Duration `json:"intermediateCAsCertificates"`
 	// ClientCertificates is the 'duration' (i.e. lifetime) of the client certificates.
 	// It defaults to 1 year.
 	// +optional
+	// +kubebuilder:validation:XValidation:rule="duration(self) >= duration('0s')",message="must be a non-negative Go duration such as 720h or 1h30m; units are ns, us, ms, s, m and h"
 	ClientCertificates *metav1.Duration `json:"clientCertificates"`
 	// FrontendCertificate is the 'duration' (i.e. lifetime) of the frontend certificate.
 	// It defaults to 1 year.
 	// +optional
+	// +kubebuilder:validation:XValidation:rule="duration(self) >= duration('0s')",message="must be a non-negative Go duration such as 720h or 1h30m; units are ns, us, ms, s, m and h"
 	FrontendCertificate *metav1.Duration `json:"frontendCertificate"`
 	// InternodeCertificate is the 'duration' (i.e. lifetime) of the internode certificate.
 	// It defaults to 1 year.
 	// +optional
+	// +kubebuilder:validation:XValidation:rule="duration(self) >= duration('0s')",message="must be a non-negative Go duration such as 720h or 1h30m; units are ns, us, ms, s, m and h"
 	InternodeCertificate *metav1.Duration `json:"internodeCertificate"`
 }
 
@@ -735,12 +744,14 @@ type MTLSSpec struct {
 	// Defaults to 1 hour.
 	// Useless if mTLS provider is not cert-manager.
 	// +optional
+	// +kubebuilder:validation:XValidation:rule="duration(self) >= duration('0s')",message="must be a non-negative Go duration such as 720h or 1h30m; units are ns, us, ms, s, m and h"
 	RefreshInterval *metav1.Duration `json:"refreshInterval"`
 	// RenewBefore is defines how long before the currently issued certificate's expiry
 	// cert-manager should renew the certificate. The default is 2/3 of the
 	// issued certificate's duration. Minimum accepted value is 5 minutes.
 	// Useless if mTLS provider is not cert-manager.
 	// +optional
+	// +kubebuilder:validation:XValidation:rule="duration(self) >= duration('0s')",message="must be a non-negative Go duration such as 720h or 1h30m; units are ns, us, ms, s, m and h"
 	RenewBefore *metav1.Duration `json:"renewBefore,omitempty"`
 	// PermissiveMetrics allows insecure HTTP requests to the metrics endpoint.
 	// This is handy if the metrics collector does not support mTLS.
@@ -861,6 +872,7 @@ type DynamicConfigSpec struct {
 	// PollInterval defines how often the config should be updated by checking provided values.
 	// Defaults to 10s.
 	// +optional
+	// +kubebuilder:validation:XValidation:rule="duration(self) >= duration('0s')",message="must be a non-negative Go duration such as 720h or 1h30m; units are ns, us, ms, s, m and h"
 	PollInterval *metav1.Duration `json:"pollInterval"`
 	// Values contains all dynamic config keys and their constrained values.
 	Values map[string][]ConstrainedValue `json:"values"`
@@ -989,6 +1001,7 @@ type AuthorizationSpecJWTKeyProvider struct {
 	// RefreshInterval defines the time interval at which temporal should refresh the JWT signing keys from
 	// the specified URIs.
 	// +optional
+	// +kubebuilder:validation:XValidation:rule="duration(self) >= duration('0s')",message="must be a non-negative Go duration such as 720h or 1h30m; units are ns, us, ms, s, m and h"
 	RefreshInterval *metav1.Duration `json:"refreshInterval"`
 }
 
