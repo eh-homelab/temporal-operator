@@ -18,6 +18,9 @@
 package v1beta1
 
 import (
+	"fmt"
+	"net"
+	"strconv"
 	"time"
 
 	"github.com/alexandrevilain/temporal-operator/pkg/version"
@@ -253,9 +256,17 @@ func (c *TemporalCluster) Default() {
 	}
 
 	if c.Spec.Metrics.IsEnabled() {
-		if c.Spec.Metrics.Prometheus != nil {
-			if c.Spec.Metrics.Prometheus.ListenPort == nil {
-				c.Spec.Metrics.Prometheus.ListenPort = ptr.To[int32](9090)
+		if p := c.Spec.Metrics.Prometheus; p != nil {
+			// The deprecated ListenAddress gives the port when ListenPort is not set.
+			// An unparsable address is left for the mutating webhook to reject.
+			if p.ListenAddress != "" && p.ListenPort == nil {
+				if port, err := p.ListenAddressPort(); err == nil {
+					p.ListenAddress = ""
+					p.ListenPort = ptr.To(port)
+				}
+			}
+			if p.ListenPort == nil {
+				p.ListenPort = ptr.To[int32](9090)
 			}
 		}
 	}
@@ -265,4 +276,17 @@ func (c *TemporalCluster) Default() {
 			c.Spec.DynamicConfig.PollInterval = &metav1.Duration{Duration: time.Minute * 10}
 		}
 	}
+}
+
+// ListenAddressPort parses the port of the deprecated ListenAddress.
+func (p *PrometheusSpec) ListenAddressPort() (int32, error) {
+	_, port, err := net.SplitHostPort(p.ListenAddress)
+	if err != nil {
+		return 0, fmt.Errorf("can't parse prometheus spec.metrics.prometheus.listenAddress: %w", err)
+	}
+	portInt, err := strconv.ParseInt(port, 10, 32)
+	if err != nil {
+		return 0, fmt.Errorf("can't parse prometheus spec.metrics.prometheus.listenAddress port: %w", err)
+	}
+	return int32(portInt), nil
 }
