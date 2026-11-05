@@ -20,7 +20,6 @@ package webhooks
 import (
 	"context"
 	"fmt"
-	"net"
 	"strconv"
 
 	"github.com/alexandrevilain/temporal-operator/api/v1beta1"
@@ -31,7 +30,6 @@ import (
 	"go.temporal.io/server/common/primitives"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/util/validation/field"
-	"k8s.io/utils/ptr"
 	"k8s.io/utils/strings/slices"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
@@ -57,21 +55,12 @@ func (w *TemporalClusterWebhook) aggregateClusterErrors(cluster *v1beta1.Tempora
 
 // Default ensures empty fields have their default value.
 func (w *TemporalClusterWebhook) Default(_ context.Context, cluster *v1beta1.TemporalCluster) error {
+	// Default converts a valid deprecated listenAddress to listenPort. An
+	// unparsable one is rejected here.
 	if cluster.Spec.Metrics.IsEnabled() {
-		if cluster.Spec.Metrics.Prometheus != nil {
-			// If the user has set the deprecated ListenAddress field and not the new ListenPort,
-			// parse the listenAddress and set the listenPort.
-			if cluster.Spec.Metrics.Prometheus.ListenAddress != "" && cluster.Spec.Metrics.Prometheus.ListenPort == nil {
-				_, port, err := net.SplitHostPort(cluster.Spec.Metrics.Prometheus.ListenAddress)
-				if err != nil {
-					return fmt.Errorf("can't parse prometheus spec.metrics.prometheus.listenAddress: %w", err)
-				}
-				portInt, err := strconv.ParseInt(port, 10, 32)
-				if err != nil {
-					return fmt.Errorf("can't parse prometheus spec.metrics.prometheus.listenAddress port: %w", err)
-				}
-				cluster.Spec.Metrics.Prometheus.ListenAddress = "" // Empty the listen address
-				cluster.Spec.Metrics.Prometheus.ListenPort = ptr.To(int32(portInt))
+		if p := cluster.Spec.Metrics.Prometheus; p != nil && p.ListenAddress != "" && p.ListenPort == nil {
+			if _, err := p.ListenAddressPort(); err != nil {
+				return err
 			}
 		}
 	}

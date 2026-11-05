@@ -24,6 +24,7 @@ import (
 	"time"
 
 	"go.temporal.io/server/common/primitives"
+	"k8s.io/apimachinery/pkg/types"
 	kerrors "k8s.io/apimachinery/pkg/util/errors"
 
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -86,6 +87,20 @@ type TemporalClusterReconciler struct {
 //+kubebuilder:rbac:groups=temporal.io,resources=temporalclusters/status,verbs=get;update;patch
 //+kubebuilder:rbac:groups=temporal.io,resources=temporalclusters/finalizers,verbs=update
 
+// getCluster reads the cluster and defaults it in memory. The mutating webhook
+// defaults an object only when it is written, so one stored before an operator
+// upgrade added a defaulted field lacks it, and builders would read it empty
+// (an admin tools image of ":<tag>"). The defaults are applied before the patch
+// helper takes its snapshot, so they are never written back.
+func (r *TemporalClusterReconciler) getCluster(ctx context.Context, key types.NamespacedName) (*v1beta1.TemporalCluster, error) {
+	cluster := &v1beta1.TemporalCluster{}
+	if err := r.Get(ctx, key, cluster); err != nil {
+		return nil, err
+	}
+	cluster.Default()
+	return cluster, nil
+}
+
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
 func (r *TemporalClusterReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ ctrl.Result, reterr error) {
@@ -93,8 +108,7 @@ func (r *TemporalClusterReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 
 	logger.Info("Starting reconciliation")
 
-	cluster := &v1beta1.TemporalCluster{}
-	err := r.Get(ctx, req.NamespacedName, cluster)
+	cluster, err := r.getCluster(ctx, req.NamespacedName)
 	if err != nil {
 		if apierrors.IsNotFound(err) {
 			return reconcile.Result{}, nil
