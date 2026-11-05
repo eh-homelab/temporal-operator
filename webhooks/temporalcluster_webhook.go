@@ -22,7 +22,6 @@ import (
 	"fmt"
 	"net"
 	"strconv"
-	"strings"
 
 	"github.com/alexandrevilain/temporal-operator/api/v1beta1"
 	"github.com/alexandrevilain/temporal-operator/internal/discovery"
@@ -118,7 +117,7 @@ func (w *TemporalClusterWebhook) validateCluster(cluster *v1beta1.TemporalCluste
 	if cluster.Spec.AdminTools != nil {
 		if tag := v1beta1.ImageTag(cluster.Spec.AdminTools.Image); tag != "" {
 			want := fmt.Sprintf("%d.%d", cluster.Spec.Version.Major(), cluster.Spec.Version.Minor())
-			if !adminToolsTagMatches(tag, want) {
+			if !v1beta1.AdminToolsTagMatches(tag, want) {
 				errs = append(errs,
 					field.Invalid(field.NewPath("spec", "admintools", "image"), cluster.Spec.AdminTools.Image,
 						fmt.Sprintf("The admin tools tag must be for Temporal %s, the server's minor version", want)),
@@ -485,14 +484,4 @@ func (w *TemporalClusterWebhook) SetupWebhookWithManager(mgr ctrl.Manager) error
 		WithDefaulter(w).
 		WithValidator(w).
 		Complete()
-}
-
-// adminToolsTagMatches reports whether an admin tools tag ("1.28", "1.28.4-tctl-...")
-// is for Temporal major.minor want ("1.28").
-func adminToolsTagMatches(tag, want string) bool {
-	if !strings.HasPrefix(tag, want) {
-		return false
-	}
-	rest := tag[len(want):]
-	return rest == "" || rest[0] == '.' || rest[0] == '-'
 }
