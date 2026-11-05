@@ -1,5 +1,16 @@
 # temporal-operator
 
+> **eh-homelab fork.** [alexandrevilain/temporal-operator](https://github.com/alexandrevilain/temporal-operator) has had no release since v0.22.0 (2025-10-31). This fork is maintained and kept up to date. It adds:
+>
+> - Temporal Server 1.29 to 1.32 support.
+> - Multi-cluster replication settings (`spec.clusterMetadata`).
+> - `replicas: 0` for a single server service.
+> - Security and dependency updates.
+>
+> Releases are tagged `v<upstream>-eh.<n>` and publish the operator image `ghcr.io/eh-homelab/temporal-operator` and the release manifests ([releases](https://github.com/eh-homelab/temporal-operator/releases)). The fork also builds Temporal's own images, `ghcr.io/eh-homelab/temporal-server` and `ghcr.io/eh-homelab/temporal-admin-tools`, automatically for each new upstream Temporal release. All images are public and multi-arch (amd64, arm64).
+>
+> Bugs from the upstream tracker that still affect this code are mirrored here with the [`upstream`](https://github.com/eh-homelab/temporal-operator/issues?q=label%3Aupstream) label, and fixes are offered back upstream as pull requests. Report issues in [this fork](https://github.com/eh-homelab/temporal-operator/issues).
+
 The Kubernetes Operator to deploy and manage [Temporal](https://temporal.io/) clusters.
 
 Using this operator, deploying a Temporal Cluster on Kubernetes is as easy as deploying the following manifest:
