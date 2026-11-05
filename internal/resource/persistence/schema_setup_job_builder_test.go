@@ -29,18 +29,26 @@ import (
 )
 
 // The schema jobs migrate with the admin tools image: a pinned reference is used as
-// written, and an untagged one gets the tag for the server's minor.
+// written, and an untagged one gets spec.admintools.version when it is for the
+// server's minor, and the default tag for the server version otherwise.
 func TestSchemaJobAdminToolsImage(t *testing.T) {
-	for adminTools, want := range map[string]string{
-		"temporalio/admin-tools":                    "temporalio/admin-tools:1.28",
-		"temporalio/admin-tools:1.28@sha256:abc123": "temporalio/admin-tools:1.28@sha256:abc123",
+	for _, tt := range []struct {
+		adminTools v1beta1.TemporalAdminToolsSpec
+		want       string
+	}{
+		{v1beta1.TemporalAdminToolsSpec{Image: "temporalio/admin-tools"}, "temporalio/admin-tools:1.28"},
+		{v1beta1.TemporalAdminToolsSpec{Image: "temporalio/admin-tools:1.28@sha256:abc123"}, "temporalio/admin-tools:1.28@sha256:abc123"},
+		{v1beta1.TemporalAdminToolsSpec{Image: "temporalio/admin-tools", Version: "1.28.1-tctl-1.18.4-cli-1.4.1"}, "temporalio/admin-tools:1.28.1-tctl-1.18.4-cli-1.4.1"},
+		// A version stored before the server moved to 1.28 names the old minor.
+		{v1beta1.TemporalAdminToolsSpec{Image: "temporalio/admin-tools", Version: "1.27.3"}, "temporalio/admin-tools:1.28"},
 	} {
+		adminTools := tt.adminTools
 		c := &v1beta1.TemporalCluster{
 			TypeMeta:   v1beta1.TemporalClusterTypeMeta,
 			ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "default"},
 			Spec: v1beta1.TemporalClusterSpec{
 				Image:      "temporalio/server:1.28.4",
-				AdminTools: &v1beta1.TemporalAdminToolsSpec{Image: adminTools},
+				AdminTools: &adminTools,
 				Persistence: v1beta1.TemporalPersistenceSpec{
 					DefaultStore:    &v1beta1.DatastoreSpec{Name: "default", SQL: &v1beta1.SQLSpec{PluginName: "postgres12"}},
 					VisibilityStore: &v1beta1.DatastoreSpec{Name: "visibility", SQL: &v1beta1.SQLSpec{PluginName: "postgres12"}},
@@ -50,6 +58,6 @@ func TestSchemaJobAdminToolsImage(t *testing.T) {
 		c.Default()
 
 		job := persistence.NewSchemaJobBuilder(c, runtime.NewScheme(), "update-default-schema", []string{"true"}).Build().(*batchv1.Job)
-		assert.Equal(t, want, job.Spec.Template.Spec.Containers[0].Image, adminTools)
+		assert.Equal(t, tt.want, job.Spec.Template.Spec.Containers[0].Image, adminTools.Image)
 	}
 }
