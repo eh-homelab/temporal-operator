@@ -513,6 +513,7 @@ spec:
                         description: |-
                           RefreshInterval defines the time interval at which temporal should refresh the JWT signing keys from
                           the specified URIs.
+                        pattern: ^[-+]?(0|(([0-9]+(\.[0-9]*)?|\.[0-9]+)(ns|us|µs|μs|ms|s|m|h))+)$
                         type: string
                     type: object
                   permissionsClaimName:
@@ -555,6 +556,7 @@ spec:
                     description: |-
                       PollInterval defines how often the config should be updated by checking provided values.
                       Defaults to 10s.
+                    pattern: ^[-+]?(0|(([0-9]+(\.[0-9]*)?|\.[0-9]+)(ns|us|µs|μs|ms|s|m|h))+)$
                     type: string
                   values:
                     additionalProperties:
@@ -751,26 +753,31 @@ spec:
                         description: |-
                           ClientCertificates is the 'duration' (i.e. lifetime) of the client certificates.
                           It defaults to 1 year.
+                        pattern: ^[-+]?(0|(([0-9]+(\.[0-9]*)?|\.[0-9]+)(ns|us|µs|μs|ms|s|m|h))+)$
                         type: string
                       frontendCertificate:
                         description: |-
                           FrontendCertificate is the 'duration' (i.e. lifetime) of the frontend certificate.
                           It defaults to 1 year.
+                        pattern: ^[-+]?(0|(([0-9]+(\.[0-9]*)?|\.[0-9]+)(ns|us|µs|μs|ms|s|m|h))+)$
                         type: string
                       intermediateCAsCertificates:
                         description: |-
                           IntermediateCACertificates is the 'duration' (i.e. lifetime) of the intermediate CAs Certificates.
                           It defaults to 5 years.
+                        pattern: ^[-+]?(0|(([0-9]+(\.[0-9]*)?|\.[0-9]+)(ns|us|µs|μs|ms|s|m|h))+)$
                         type: string
                       internodeCertificate:
                         description: |-
                           InternodeCertificate is the 'duration' (i.e. lifetime) of the internode certificate.
                           It defaults to 1 year.
+                        pattern: ^[-+]?(0|(([0-9]+(\.[0-9]*)?|\.[0-9]+)(ns|us|µs|μs|ms|s|m|h))+)$
                         type: string
                       rootCACertificate:
                         description: |-
                           RootCACertificate is the 'duration' (i.e. lifetime) of the Root CA Certificate.
                           It defaults to 10 years.
+                        pattern: ^[-+]?(0|(([0-9]+(\.[0-9]*)?|\.[0-9]+)(ns|us|µs|μs|ms|s|m|h))+)$
                         type: string
                     type: object
                   frontend:
@@ -821,6 +828,7 @@ spec:
                       RefreshInterval defines interval between refreshes of certificates in the cluster components.
                       Defaults to 1 hour.
                       Useless if mTLS provider is not cert-manager.
+                    pattern: ^[-+]?(0|(([0-9]+(\.[0-9]*)?|\.[0-9]+)(ns|us|µs|μs|ms|s|m|h))+)$
                     type: string
                   renewBefore:
                     description: |-
@@ -828,6 +836,7 @@ spec:
                       cert-manager should renew the certificate. The default is 2/3 of the
                       issued certificate's duration. Minimum accepted value is 5 minutes.
                       Useless if mTLS provider is not cert-manager.
+                    pattern: ^[-+]?(0|(([0-9]+(\.[0-9]*)?|\.[0-9]+)(ns|us|µs|μs|ms|s|m|h))+)$
                     type: string
                 type: object
               metrics:
@@ -2286,6 +2295,7 @@ spec:
                           connectTimeout:
                             description: ConnectTimeout is a timeout for initial dial
                               to cassandra server.
+                            pattern: ^[-+]?(0|(([0-9]+(\.[0-9]*)?|\.[0-9]+)(ns|us|µs|μs|ms|s|m|h))+)$
                             type: string
                           consistency:
                             description: Consistency configuration.
@@ -2355,6 +2365,7 @@ spec:
                           closeIdleConnectionsInterval:
                             description: CloseIdleConnectionsInterval is the max duration
                               a connection stay open while idle.
+                            pattern: ^[-+]?(0|(([0-9]+(\.[0-9]*)?|\.[0-9]+)(ns|us|µs|μs|ms|s|m|h))+)$
                             type: string
                           enableHealthcheck:
                             description: EnableHealthcheck enables or disables healthcheck
@@ -2457,6 +2468,7 @@ spec:
                           maxConnLifetime:
                             description: MaxConnLifetime is the maximum time a connection
                               can be alive
+                            pattern: ^[-+]?(0|(([0-9]+(\.[0-9]*)?|\.[0-9]+)(ns|us|µs|μs|ms|s|m|h))+)$
                             type: string
                           maxConns:
                             description: MaxConns the max number of connections to
@@ -2489,6 +2501,7 @@ spec:
                                 description: |-
                                   Timeout is the maximum duration to wait for the command to complete.
                                   Defaults to 30 seconds if unset.
+                                pattern: ^[-+]?(0|(([0-9]+(\.[0-9]*)?|\.[0-9]+)(ns|us|µs|μs|ms|s|m|h))+)$
                                 type: string
                             required:
                             - command
@@ -2584,6 +2597,7 @@ spec:
                           connectTimeout:
                             description: ConnectTimeout is a timeout for initial dial
                               to cassandra server.
+                            pattern: ^[-+]?(0|(([0-9]+(\.[0-9]*)?|\.[0-9]+)(ns|us|µs|μs|ms|s|m|h))+)$
                             type: string
                           consistency:
                             description: Consistency configuration.
@@ -2653,6 +2667,7 @@ spec:
                           closeIdleConnectionsInterval:
                             description: CloseIdleConnectionsInterval is the max duration
                               a connection stay open while idle.
+                            pattern: ^[-+]?(0|(([0-9]+(\.[0-9]*)?|\.[0-9]+)(ns|us|µs|μs|ms|s|m|h))+)$
                             type: string
                           enableHealthcheck:
                             description: EnableHealthcheck enables or disables healthcheck
@@ -2755,6 +2770,7 @@ spec:
                           maxConnLifetime:
                             description: MaxConnLifetime is the maximum time a connection
                               can be alive
+                            pattern: ^[-+]?(0|(([0-9]+(\.[0-9]*)?|\.[0-9]+)(ns|us|µs|μs|ms|s|m|h))+)$
                             type: string
                           maxConns:
                             description: MaxConns the max number of connections to
@@ -2787,6 +2803,7 @@ spec:
                                 description: |-
                                   Timeout is the maximum duration to wait for the command to complete.
                                   Defaults to 30 seconds if unset.
+                                pattern: ^[-+]?(0|(([0-9]+(\.[0-9]*)?|\.[0-9]+)(ns|us|µs|μs|ms|s|m|h))+)$
                                 type: string
                             required:
                             - command
@@ -2884,6 +2901,7 @@ spec:
                           connectTimeout:
                             description: ConnectTimeout is a timeout for initial dial
                               to cassandra server.
+                            pattern: ^[-+]?(0|(([0-9]+(\.[0-9]*)?|\.[0-9]+)(ns|us|µs|μs|ms|s|m|h))+)$
                             type: string
                           consistency:
                             description: Consistency configuration.
@@ -2953,6 +2971,7 @@ spec:
                           closeIdleConnectionsInterval:
                             description: CloseIdleConnectionsInterval is the max duration
                               a connection stay open while idle.
+                            pattern: ^[-+]?(0|(([0-9]+(\.[0-9]*)?|\.[0-9]+)(ns|us|µs|μs|ms|s|m|h))+)$
                             type: string
                           enableHealthcheck:
                             description: EnableHealthcheck enables or disables healthcheck
@@ -3055,6 +3074,7 @@ spec:
                           maxConnLifetime:
                             description: MaxConnLifetime is the maximum time a connection
                               can be alive
+                            pattern: ^[-+]?(0|(([0-9]+(\.[0-9]*)?|\.[0-9]+)(ns|us|µs|μs|ms|s|m|h))+)$
                             type: string
                           maxConns:
                             description: MaxConns the max number of connections to
@@ -3087,6 +3107,7 @@ spec:
                                 description: |-
                                   Timeout is the maximum duration to wait for the command to complete.
                                   Defaults to 30 seconds if unset.
+                                pattern: ^[-+]?(0|(([0-9]+(\.[0-9]*)?|\.[0-9]+)(ns|us|µs|μs|ms|s|m|h))+)$
                                 type: string
                             required:
                             - command
@@ -3182,6 +3203,7 @@ spec:
                           connectTimeout:
                             description: ConnectTimeout is a timeout for initial dial
                               to cassandra server.
+                            pattern: ^[-+]?(0|(([0-9]+(\.[0-9]*)?|\.[0-9]+)(ns|us|µs|μs|ms|s|m|h))+)$
                             type: string
                           consistency:
                             description: Consistency configuration.
@@ -3251,6 +3273,7 @@ spec:
                           closeIdleConnectionsInterval:
                             description: CloseIdleConnectionsInterval is the max duration
                               a connection stay open while idle.
+                            pattern: ^[-+]?(0|(([0-9]+(\.[0-9]*)?|\.[0-9]+)(ns|us|µs|μs|ms|s|m|h))+)$
                             type: string
                           enableHealthcheck:
                             description: EnableHealthcheck enables or disables healthcheck
@@ -3353,6 +3376,7 @@ spec:
                           maxConnLifetime:
                             description: MaxConnLifetime is the maximum time a connection
                               can be alive
+                            pattern: ^[-+]?(0|(([0-9]+(\.[0-9]*)?|\.[0-9]+)(ns|us|µs|μs|ms|s|m|h))+)$
                             type: string
                           maxConns:
                             description: MaxConns the max number of connections to
@@ -3385,6 +3409,7 @@ spec:
                                 description: |-
                                   Timeout is the maximum duration to wait for the command to complete.
                                   Defaults to 30 seconds if unset.
+                                pattern: ^[-+]?(0|(([0-9]+(\.[0-9]*)?|\.[0-9]+)(ns|us|µs|μs|ms|s|m|h))+)$
                                 type: string
                             required:
                             - command
@@ -3584,10 +3609,11 @@ spec:
                         format: int32
                         type: integer
                       replicas:
-                        description: Number of desired replicas for the service. Default
-                          to 1.
+                        description: |-
+                          Number of desired replicas for the service. Default to 1. 0 stops the
+                          service without deleting the cluster (its Deployment scales to zero).
                         format: int32
-                        minimum: 1
+                        minimum: 0
                         type: integer
                       resources:
                         description: |-
@@ -3758,10 +3784,11 @@ spec:
                         format: int32
                         type: integer
                       replicas:
-                        description: Number of desired replicas for the service. Default
-                          to 1.
+                        description: |-
+                          Number of desired replicas for the service. Default to 1. 0 stops the
+                          service without deleting the cluster (its Deployment scales to zero).
                         format: int32
-                        minimum: 1
+                        minimum: 0
                         type: integer
                       resources:
                         description: |-
@@ -3939,10 +3966,11 @@ spec:
                         format: int32
                         type: integer
                       replicas:
-                        description: Number of desired replicas for the service. Default
-                          to 1.
+                        description: |-
+                          Number of desired replicas for the service. Default to 1. 0 stops the
+                          service without deleting the cluster (its Deployment scales to zero).
                         format: int32
-                        minimum: 1
+                        minimum: 0
                         type: integer
                       resources:
                         description: |-
@@ -4113,10 +4141,11 @@ spec:
                         format: int32
                         type: integer
                       replicas:
-                        description: Number of desired replicas for the service. Default
-                          to 1.
+                        description: |-
+                          Number of desired replicas for the service. Default to 1. 0 stops the
+                          service without deleting the cluster (its Deployment scales to zero).
                         format: int32
-                        minimum: 1
+                        minimum: 0
                         type: integer
                       resources:
                         description: |-
@@ -4354,10 +4383,11 @@ spec:
                         format: int32
                         type: integer
                       replicas:
-                        description: Number of desired replicas for the service. Default
-                          to 1.
+                        description: |-
+                          Number of desired replicas for the service. Default to 1. 0 stops the
+                          service without deleting the cluster (its Deployment scales to zero).
                         format: int32
-                        minimum: 1
+                        minimum: 0
                         type: integer
                       resources:
                         description: |-
@@ -4992,6 +5022,7 @@ spec:
                 type: string
               retentionPeriod:
                 description: RetentionPeriod to apply on closed workflow executions.
+                pattern: ^[-+]?(0|(([0-9]+(\.[0-9]*)?|\.[0-9]+)(ns|us|µs|μs|ms|s|m|h))+)$
                 type: string
               securityToken:
                 type: string
@@ -5157,6 +5188,7 @@ spec:
                           executionTimeout:
                             description: WorkflowExecutionTimeout is the timeout for
                               duration of workflow execution.
+                            pattern: ^[-+]?(0|(([0-9]+(\.[0-9]*)?|\.[0-9]+)(ns|us|µs|μs|ms|s|m|h))+)$
                             type: string
                           id:
                             description: |-
@@ -5193,6 +5225,7 @@ spec:
                               initialInterval:
                                 description: Interval of the first retry. If retryBackoffCoefficient
                                   is 1.0 then it is used for all retries.
+                                pattern: ^[-+]?(0|(([0-9]+(\.[0-9]*)?|\.[0-9]+)(ns|us|µs|μs|ms|s|m|h))+)$
                                 type: string
                               maximumAttempts:
                                 description: |-
@@ -5204,6 +5237,7 @@ spec:
                                 description: |-
                                   Maximum interval between retries. Exponential backoff leads to interval increase.
                                   This value is the cap of the increase. Default is 100x of the initial interval.
+                                pattern: ^[-+]?(0|(([0-9]+(\.[0-9]*)?|\.[0-9]+)(ns|us|µs|μs|ms|s|m|h))+)$
                                 type: string
                               nonRetryableErrorTypes:
                                 description: |-
@@ -5216,6 +5250,7 @@ spec:
                           runTimeout:
                             description: WorkflowRunTimeout is the timeout for duration
                               of a single workflow run.
+                            pattern: ^[-+]?(0|(([0-9]+(\.[0-9]*)?|\.[0-9]+)(ns|us|µs|μs|ms|s|m|h))+)$
                             type: string
                           searchAttributes:
                             description: |-
@@ -5235,6 +5270,7 @@ spec:
                             description: |-
                               WorkflowTaskTimeout is The timeout for processing workflow task from the time the worker
                               pulled this task.
+                            pattern: ^[-+]?(0|(([0-9]+(\.[0-9]*)?|\.[0-9]+)(ns|us|µs|μs|ms|s|m|h))+)$
                             type: string
                           type:
                             description: |-
@@ -5257,6 +5293,7 @@ spec:
                           CatchupWindow The Temporal Server might be down or unavailable at the time
                           when a Schedule should take an Action. When the Server comes back up,
                           CatchupWindow controls which missed Actions should be taken at that point.
+                        pattern: ^[-+]?(0|(([0-9]+(\.[0-9]*)?|\.[0-9]+)(ns|us|µs|μs|ms|s|m|h))+)$
                         type: string
                       overlap:
                         description: |-
@@ -5925,11 +5962,13 @@ spec:
                             every:
                               description: Every describes the period to repeat the
                                 interval.
+                              pattern: ^[-+]?(0|(([0-9]+(\.[0-9]*)?|\.[0-9]+)(ns|us|µs|μs|ms|s|m|h))+)$
                               type: string
                             offset:
                               description: |-
                                 Offset is a fixed offset added to the intervals period.
                                 Defaults to 0.
+                              pattern: ^[-+]?(0|(([0-9]+(\.[0-9]*)?|\.[0-9]+)(ns|us|µs|μs|ms|s|m|h))+)$
                               type: string
                           required:
                           - every
@@ -5941,6 +5980,7 @@ spec:
                           All times will be incremented by a random value from 0 to this amount of jitter, capped
                           by the time until the next schedule.
                           Defaults to 0.
+                        pattern: ^[-+]?(0|(([0-9]+(\.[0-9]*)?|\.[0-9]+)(ns|us|µs|μs|ms|s|m|h))+)$
                         type: string
                       startAt:
                         description: |-

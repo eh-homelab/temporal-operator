@@ -159,6 +159,7 @@ spec:
                 type: string
               retentionPeriod:
                 description: RetentionPeriod to apply on closed workflow executions.
+                pattern: ^[-+]?(0|(([0-9]+(\.[0-9]*)?|\.[0-9]+)(ns|us|µs|μs|ms|s|m|h))+)$
                 type: string
               securityToken:
                 type: string

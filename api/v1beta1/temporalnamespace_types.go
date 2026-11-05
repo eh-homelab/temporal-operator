@@ -42,6 +42,8 @@ type TemporalNamespaceSpec struct {
 	// +optional
 	OwnerEmail string `json:"ownerEmail,omitempty"`
 	// RetentionPeriod to apply on closed workflow executions.
+	// +kubebuilder:validation:Type=string
+	// +kubebuilder:validation:Pattern=`^[-+]?(0|(([0-9]+(\.[0-9]*)?|\.[0-9]+)(ns|us|µs|μs|ms|s|m|h))+)$`
 	RetentionPeriod *metav1.Duration `json:"retentionPeriod"`
 	// Data is a key-value map for any customized purpose.
 	// +optional
