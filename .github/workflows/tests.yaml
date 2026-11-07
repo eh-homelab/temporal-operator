@@ -58,6 +58,25 @@ jobs:
           check-latest: true
       - name: build
         run: make build
+  chart:
+    name: Package Helm chart
+    runs-on: 'ubuntu-latest'
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: 'go.mod'
+          check-latest: true
+      - uses: azure/setup-helm@v4
+        with:
+          version: v3.21.4
+      # The release runs the same script on its tag (eh-release.yaml).
+      - name: package
+        run: |
+          make artifacts
+          hack/eh/package-chart.sh v0.0.0-eh.0 out/release/chart
+          helm template temporal-operator out/release/chart/temporal-operator-0.0.0-eh.0.tgz \
+            -n temporal-system --include-crds > /dev/null
   test:
     name: Test operator
     runs-on: 'ubuntu-latest'

@@ -7,7 +7,7 @@
 > - `replicas: 0` for a single server service.
 > - Security and dependency updates.
 >
-> Releases are tagged `v<upstream>-eh.<n>` and publish the operator image `ghcr.io/eh-homelab/temporal-operator` and the release manifests ([releases](https://github.com/eh-homelab/temporal-operator/releases)). The fork also builds Temporal's own images, `ghcr.io/eh-homelab/temporal-server` and `ghcr.io/eh-homelab/temporal-admin-tools`, automatically for each new upstream Temporal release. All images are public and multi-arch (amd64, arm64).
+> Releases are tagged `v<upstream>-eh.<n>` and publish the operator image `ghcr.io/eh-homelab/temporal-operator` the Helm chart `oci://ghcr.io/eh-homelab/charts/temporal-operator` (chart version = tag without the `v`), and the release manifests ([releases](https://github.com/eh-homelab/temporal-operator/releases)). The fork also builds Temporal's own images, `ghcr.io/eh-homelab/temporal-server` and `ghcr.io/eh-homelab/temporal-admin-tools`, automatically for each new upstream Temporal release. All images are public and multi-arch (amd64, arm64).
 >
 > Bugs from the upstream tracker that still affect this code are mirrored here with the [`upstream`](https://github.com/eh-homelab/temporal-operator/issues?q=label%3Aupstream) label, and fixes are offered back upstream as pull requests. Report issues in [this fork](https://github.com/eh-homelab/temporal-operator/issues).
 
