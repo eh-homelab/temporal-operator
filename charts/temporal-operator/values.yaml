@@ -8,7 +8,7 @@ manager:
     allowPrivilegeEscalation: false
   image:
     # -- Docker image repository for the controller manager container.
-    repository: ghcr.io/alexandrevilain/temporal-operator
+    repository: ghcr.io/eh-homelab/temporal-operator
     # Will use AppVersion as the image tag by default
     # tag: v0.0.0
   resources:

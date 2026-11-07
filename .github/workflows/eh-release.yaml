@@ -2,8 +2,10 @@ name: Publish eh-homelab fork release
 
 # eh-homelab's fork (multi-cluster replication fields on TemporalCluster).
 # A tag `v<upstream>-eh.<n>` builds and pushes ghcr.io/eh-homelab/temporal-operator:<tag>
-# and creates a GitHub release carrying temporal-operator.crds.yaml and
-# temporal-operator.yaml, the two assets eh-homelab/clusters vendors.
+# and the Helm chart oci://ghcr.io/eh-homelab/charts/temporal-operator:<tag without v>
+# (hack/eh/package-chart.sh), and creates a GitHub release carrying
+# temporal-operator.crds.yaml, temporal-operator.yaml and the chart package.
+# eh-homelab/clusters installs the chart.
 #
 # Kept 1:1 with upstream's release.yaml (same actions, multi-arch image, OCI
 # labels from docker/metadata-action). The differences, and why:
@@ -11,6 +13,8 @@ name: Publish eh-homelab fork release
 #     the release itself;
 #   - the release manifest points at this fork's image, not upstream's;
 #   - no OperatorHub bundle image: nothing here installs through OLM;
+#   - the chart is pushed here, with the tag as its version, instead of by
+#     release-chart.yaml, which publishes from `main` on its own version line;
 #   - a check that the package is public, which the nodes' anonymous ghcr
 #     proxy needs.
 on:
@@ -42,6 +46,12 @@ jobs:
           ../../bin/kustomize edit set image "ghcr.io/alexandrevilain/temporal-operator=${REGISTRY}/eh-homelab/temporal-operator:${GITHUB_REF_NAME}"
       - name: Generate release artifacts
         run: make artifacts
+      - name: Install Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: v3.21.4
+      - name: Package the Helm chart
+        run: hack/eh/package-chart.sh "${GITHUB_REF_NAME}" out/release/chart
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v4
         with:
@@ -83,8 +93,25 @@ jobs:
             echo "::error::ghcr.io/eh-homelab/temporal-operator is not public. Make the package public, then re-run this job."
             exit 1
           fi
+      # eh-homelab/clusters installs this chart from oci://ghcr.io/eh-homelab/charts,
+      # so a version bump there moves the image and the CRDs together.
+      - name: Push the Helm chart
+        env:
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "${GHCR_TOKEN}" | helm registry login ghcr.io -u "${GITHUB_ACTOR}" --password-stdin
+          helm push "out/release/chart/temporal-operator-${GITHUB_REF_NAME#v}.tgz" oci://ghcr.io/eh-homelab/charts
+      - name: Check the chart is publicly pullable
+        run: |
+          # Same check as the image: ArgoCD pulls the chart without credentials.
+          if ! helm registry logout ghcr.io ||
+            ! helm show chart oci://ghcr.io/eh-homelab/charts/temporal-operator --version "${GITHUB_REF_NAME#v}" > /dev/null; then
+            echo "::error::ghcr.io/eh-homelab/charts/temporal-operator is not public. Make the package public, then re-run this job."
+            exit 1
+          fi
       - name: Release
         uses: softprops/action-gh-release@v2
         with:
           files: |
             out/release/artifacts/*.yaml
+            out/release/chart/*.tgz

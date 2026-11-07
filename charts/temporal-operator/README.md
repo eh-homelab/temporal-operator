@@ -35,7 +35,7 @@ helm install [RELEASE_NAME] temporal-operator/temporal-operator
 | manager.args | list | `["--leader-elect"]` | Arguments to be passed to the controller manager container. |
 | manager.containerSecurityContext | object | `{"allowPrivilegeEscalation":false}` | Security context for the controller manager container. |
 | manager.containerSecurityContext.allowPrivilegeEscalation | bool | `false` | Disallow privilege escalation for the container. |
-| manager.image.repository | string | `"ghcr.io/alexandrevilain/temporal-operator"` | Docker image repository for the controller manager container. |
+| manager.image.repository | string | `"ghcr.io/eh-homelab/temporal-operator"` | Docker image repository for the controller manager container. |
 | manager.nodeSelector | object | `{}` |  |
 | manager.replicas | int | `1` | Number of controller manager replicas to deploy. |
 | manager.resources.limits | object | `{"cpu":"500m","memory":"128Mi"}` | Resources limits for the controller manager container. |
