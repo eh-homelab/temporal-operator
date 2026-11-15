@@ -3,4 +3,4 @@
 # temporalio releases a new server version. Merging that PR runs
 # eh-temporal-upstream.yaml, which tags temporal-v<version>-eh.1 and builds
 # ghcr.io/eh-homelab/temporal-{server,admin-tools}:<version>.
-FROM temporalio/server:1.32.1
+FROM temporalio/server:1.32.2
