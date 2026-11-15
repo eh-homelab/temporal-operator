@@ -77,6 +77,7 @@ jobs:
           hack/eh/package-chart.sh v0.0.0-eh.0 out/release/chart
           helm template temporal-operator out/release/chart/temporal-operator-0.0.0-eh.0.tgz \
             -n temporal-system --include-crds > /dev/null
+          hack/eh/check-chart-selectors.sh out/release/chart/temporal-operator-0.0.0-eh.0.tgz
   test:
     name: Test operator
     runs-on: 'ubuntu-latest'

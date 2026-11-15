@@ -51,7 +51,9 @@ jobs:
         with:
           version: v3.21.4
       - name: Package the Helm chart
-        run: hack/eh/package-chart.sh "${GITHUB_REF_NAME}" out/release/chart
+        run: |
+          hack/eh/package-chart.sh "${GITHUB_REF_NAME}" out/release/chart
+          hack/eh/check-chart-selectors.sh "out/release/chart/temporal-operator-${GITHUB_REF_NAME#v}.tgz"
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v4
         with:
