@@ -11,6 +11,5 @@ spec:
   type: {{ .Values.webhook.type }}
   selector:
     control-plane: controller-manager
-  {{- include "temporal-operator.selectorLabels" . | nindent 4 }}
   ports:
 	{{- .Values.webhook.ports | toYaml | nindent 2 -}}
