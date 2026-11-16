@@ -67,7 +67,7 @@ jobs:
         with:
           go-version-file: 'go.mod'
           check-latest: true
-      - uses: azure/setup-helm@v4
+      - uses: azure/setup-helm@v5
         with:
           version: v3.21.4
       # The release runs the same script on its tag (eh-release.yaml).
